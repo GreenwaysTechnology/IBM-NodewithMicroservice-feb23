@@ -67,3 +67,388 @@ src/index.js
 console.log("Hello,Node.js")
 
 E:\session\IBM\2022\sep\nodejsmicroservice\es6app>node src/index.js
+
+Language fundamentals:
+
+JS is dynamic typed language, the data type is not declared,type of variable is understood during runtime.
+
+variables are declared using "var,let,const,this" keywords
+
+es 6 variables are declared using "let and const"
+
+let | const variableName = value(literal)
+
+
+types of literals
+
+1.string
+2.number
+3.boolean
+4.undefined
+5.NaN
+6.infinity
+7.function
+8.null
+9.object
+
+
+types ;
+
+1.string
+2.number - number,infinity,NaN
+3.boolean
+4.undefined
+5.function
+6.object - null, object
+
+strings 
+
+1. declared using  "" ,'',``(es6)
+2. 16 bit unicode character
+
+`` - back tick notation:
+
+-string interpolation
+-multi line string literal
+
+//strings 
+//"",'',``(backtick -template literals) 
+//var firstName = 'Subramaian'
+let firstName = 'Subramanian'
+let lastName = "Murugan"
+console.log("Name " + firstName + lastName)
+console.log("Name ", firstName, lastName)
+//es 6 feature
+console.log(`Name ${firstName} ${lastName}`)
+//es 6 back tic notation is used for string concatation.
+let title = 'IBM'
+let doc = "<html>" +
+    "<head>" +
+    "<title>" + title + "</title>" +
+    "</head>" +
+    "<body>" +
+    "<h1>Hello</h1>" +
+    "</body>";
+console.log(doc)
+
+let docOne = `<html>
+           <head>
+            <title>${title}</title>
+            </head>
+          <body>
+            <h1>Hello</h1>
+          </body>
+        `;
+console.log(docOne)
+
+
+
+2.Numbers
+
+-all numbers size is 64 bit aka double.
+
+let salary = 10000;
+console.log(`Salary ${salary}`);
+let totalSalary = salary * 100
+console.log(`Total salary ${salary}`);
+
+
+2.boolean
+
+- 1 bit value eiether 0 or 1;
+- offers built in literal value called true/false
+
+
+let isEnabled = true
+let isValid = false
+console.log(`IsEnabled ${isEnabled} IsValid ${isValid}`)
+
+3.undefined:
+ -undefined; if variable declared but not initalized with any valid literals
+
+let cost;
+console.log(`cost ${cost}`);
+//undefined 
+
+let price;  //no value
+console.log(`Price ${price}`)
+
+4.NaN -  Not a Number
+
+ -NaN - not a number; it is numerical error code.during numerical computation, 
+
+js engine
+ -may throw error - NaN ; 
+ -NaN is not valid value, it is error , need to be fixed if you get.
+
+when you will get NaN.
+1.if you do compuation against undefined variables.
+
+//numerical computation against undefined
+let qty; //undefined
+let price = 100;
+let totalPrice = qty * price;
+console.log(`Totatl Price is ${totalPrice}`)
+
+
+Infinity:
+.........
+
+-div/0 -
+
+let x =100;
+let y =0
+let c = x/y;
+console.log(`C ${c}`)
+
+
+let vs const:
+
+//let and const both are same
+//consts are like final keyword
+
+let a = 10
+console.log(`A is ${a}`)
+a = 20
+console.log(`A is ${a}`)
+
+const b=90
+console.log(`B is ${b}`)
+b=80
+console.log(`B is ${b}`)
+................................................................................
+...............................................................................
+				functions
+
+
+function is unit of execution, having all biz logic.
+
+function declaration and invocation
+function args and parameters
+
+//function  declaration
+function sayHello() {
+    //function body 
+    console.log('Hello,function')
+}
+//function invocation
+sayHello()
+
+...
+
+default args:
+............
+//function parameters and args:
+
+//name is arg 
+function sayHello(name) {
+    console.log(`Hello ${name}`)
+}
+//"Subramanian" -parameter
+sayHello("Subramanian")
+
+//java script allows without passing parameter : if you dont , it would initalize to undefined
+sayHello()
+
+//es 6 default args : if args are undfined , we can assign default value 
+
+function add(a = 0, b = 0) {
+    console.log(`a ${a} b ${b}`)
+    let c = a + b
+    console.log(`The result is ${c}`)
+}
+add(10, 10)
+add()
+...
+
+ 
+//return value from the function:
+
+function add(a = 0, b = 0) {
+    return a + b //expression
+}
+console.log(`The Add is ${add(10, 10)}`)
+
+function login(userName = '') {
+    return; //undefined
+}
+console.log(login())
+.....................................................................................
+			   functional Programming concepts
+
+
+1.function is value(literal) like other literals
+ let a =10;
+ here a is variable
+ here 10 is value(literal)
+ here let is keyword
+
+functions are initalized into variables,that variable is going to be used to invoke that function.
+
+//function is literal.
+
+//function is literal.
+
+function sayHello() {
+    return 'Hello'
+}
+console.log(sayHello());
+//literal syntax:
+let hello = sayHello;
+console.log(hello())
+
+//declaration and initalization in the same  place ...
+
+//if function without name, is called "anonmous function"
+let hai = function () {
+    return 'Hai'
+}
+console.log(hai())
+
+//with parameters
+let add = function (a = 0, b = 0) {
+    return a + b
+}
+console.log(`Add ${add(12,34)}`)
+....................................................................................
+				Arrow functions
+....................................................................................
+//arrow function
+
+//es 5 anonmous style function 
+let greet = function () {
+    console.log('greet')
+}
+//es 6 arrow functions 
+greet()
+greet = () => {
+    console.log('greet')
+}
+greet()
+//////////////////////////////////////////////////////////////////////////////////
+
+let add = function (a = 0, b = 0) {
+    return a + b
+}
+console.log(add(10, 10))
+
+add = (a = 0, b = 0) => {
+    return a + b
+}
+console.log(add(10, 10))
+
+//if function is having only return statement : remove {} and return statement
+add = (a = 0, b = 0) => a + b
+console.log(add(10, 10))
+
+//single parameter without default value ,we can remove ()
+
+let stock = value => value
+console.log(stock(10))
+
+..................................................................................
+			   Higher order functions
+...................................................................................
+
+Higher order functions are function which are passed as parameter to other functions
+and also we can return function from other functions.
+
+1.Function as parameter.
+
+
+function add(a, b) {
+    console.log(`${a} ${b} ${a + b}`)
+}
+add(10, 10) //values are passed directly
+let x = 10
+let y = 20
+add(x, y) //values are passed with help of variables
+
+
+//higher order functions
+//function as parameter .
+
+function sayHello(hello) {
+    //invoke  function 
+    hello()
+}
+
+//function with variables
+let hello = function () {
+    console.log('Hello')
+}
+sayHello(hello)
+sayHello(function () {
+    console.log('hello')
+})
+/////////////////////////////////////////////////////////////////////////////////////
+
+function connect(callback) {
+    callback('response')
+}
+connect(function (res) {
+    console.log(res)
+})
+///
+function auth(success, failure) {
+    //logic 
+    let isValid = false
+    if (isValid) {
+        success('login success')
+    } else {
+        failure('login failed')
+    }
+}
+auth(function (res) {
+    console.log(res)
+}, function (err) {
+    console.log(err)
+})
+....................................................................................
+			Arrow functions and hof
+
+
+const connect = callback => callback('response')
+connect(res => console.log(res))
+///
+const auth = (success, failure) => {
+    //logic 
+    let isValid = false
+    if (isValid) {
+        success('login success')
+    } else {
+        failure('login failed')
+    }
+}
+auth(res => console.log(res), err => console.log(err))
+....................................................................................
+			How to return function from another functions
+...................................................................................
+//how to return function from another function 
+
+function counter() {
+    return function () {
+        return 0
+    }
+}
+const inc = counter()
+console.log(inc())
+
+//short cut 
+console.log(counter()())
+
+//
+let like = function () {
+    return function () {
+        return 100
+    }
+}
+console.log(like()())
+like = () => {
+    return () => {
+        return 100
+    }
+}
+console.log(like()())
+like = () => () => 100
+console.log(like()())
