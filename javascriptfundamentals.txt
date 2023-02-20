@@ -452,3 +452,190 @@ like = () => {
 console.log(like()())
 like = () => () => 100
 console.log(like()())
+.....................................................................................
+				Objects
+.....................................................................................
+How to create objects?
+
+...................................................................................
+			   Objects
+....................................................................................
+
+How to create objects in js?
+
+There are two patterns
+
+1.constructors
+    -using functions - es 5 style
+    -using class -  es 6 style
+2.literal
+  
+
+
+//create object : using functtions:
+
+//es 5 style class declaration : using functions 
+
+function Employee() {
+    //instance variables
+    this.id = 1
+    this.name = 'Subramanian'
+    //instance methods
+    this.calculateSalary = function () {
+        return 1000;
+    }
+}
+//create object 
+//emp is just reference variable
+//new is operator
+//Employee() is constructor call 
+let emp = new Employee()
+console.log(`id ${emp.id} Name ${emp.name} Salary ${emp.calculateSalary()}`)
+
+
+//
+state initalization: via constructors
+//constructor parameters
+function Employee(id = 1, name = 'Subramanain') {
+    //instance variables
+    this.id = id;
+    this.name = name;
+    //instance methods
+    this.calculateSalary = function () {
+        return 1000;
+    }
+}
+//create object 
+//emp is just reference variable
+//new is operator
+//Employee() is constructor call 
+let emp = new Employee()
+console.log(`id ${emp.id} Name ${emp.name} Salary ${emp.calculateSalary()}`)
+
+emp = new Employee(23,'Karthik')
+console.log(`id ${emp.id} Name ${emp.name} Salary ${emp.calculateSalary()}`)
+..................................................................................
+			 es 6 classes
+.................................................................................
+class Employee {
+    constructor(id = 1, name = 'Subramanain') {
+        //instance variables
+        this.id = id;
+        this.name = name;
+    }
+    //instance methods
+    calculateSalary() {
+        return 1000;
+    }
+}
+//create object 
+//emp is just reference variable
+//new is operator
+//Employee() is constructor call 
+let emp = new Employee()
+console.log(`id ${emp.id} Name ${emp.name} Salary ${emp.calculateSalary()}`)
+
+emp = new Employee(23, 'Karthik')
+console.log(`id ${emp.id} Name ${emp.name} Salary ${emp.calculateSalary()}`)
+.....................................................................................
+			    literal syntax:
+....................................................................................
+//literal 
+
+//profile is just variable
+const profile = {
+    //instance variables
+    id: 1,
+    name: 'Subramanian',
+    status: true
+}
+console.log(`Id ${profile.id} ${profile.name} ${profile.status}`)
+
+//most of the time , literal objects will not have methods, but some uses cases we have.
+
+let userService = {
+    //methods
+    //syntax:1
+    save: function () {
+        return 'save method'
+    },
+    //syntax 2: arrow 
+    insert: () => 'save method',
+    //syntax 3: es 6 class method style 
+    findAll() {
+        return 'findAll'
+    }
+}
+
+console.log(userService.save())
+console.log(userService.insert())
+console.log(userService.findAll())
+
+.....................................................................................
+				Object destrucing
+//object destructuring with object as output.
+
+let getStock = () => {
+    return {
+        id: 1,
+        symbol: 'Google',
+        price: 1000,
+        qty: 10
+    }
+}
+console.log(getStock())
+
+//object with args
+getStock = (id = 0, symbol = 'google', price = 1000, qty = 10) => {
+    return {
+        id: id,
+        symbol: symbol,
+        price: price,
+        qty: qty
+    }
+}
+console.log(getStock(1, 'microsoft', 1000, 1000))
+
+// destructuring with input parameters
+getStock = (id = 0, symbol = 'google', price = 1000, qty = 10) => {
+    //objectKey:localvariable
+    //id:id
+    //if both are same,we can make it one: we can remove any one variable
+    return {
+        id,
+        symbol,
+        price,
+        qty
+    }
+}
+console.log(getStock(1, 'microsoft', 1000, 1000))
+
+getStock = (id = 0, symbol = 'google', price = 1000, qty = 10) => ({
+        id,
+        symbol,
+        price,
+        qty
+})
+
+console.log(getStock(1, 'microsoft', 1000, 1000))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

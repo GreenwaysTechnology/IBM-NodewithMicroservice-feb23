@@ -1,0 +1,380 @@
+				Modules Pattern
+...................................................................................
+
+
+In java Modularity , is presented via "Packages"
+
+Package organize the code  logically.
+
+Customer.java
+
+package com.ibm.cms
+
+public class Customer{}
+
+Java organizes code folders and files Physically.
+
+d:/javaapps/src/
+    com/ibm/cms/Customer.java
+
+What about javascript Modularity?
+
+ Javascript is file based modularity physically
+ but logically there is no such modularity at language level.
+
+collection of variable declarations and function.
+
+Once js started growing in large scale, dev struck to organize code.
+
+2000, Smart developers started thinking about how to modualrize js code.
+ 
+
+Module design patterns came.
+
+1.Namespace design pattern : 2000 : jquery
+2.AMD -Async Module Defintion : dojo
+---------------------------------------------------------
+3.CJS - Common JS =  namespace + amd:2005 on wards
+4.ES 6 Module design pattern:2012-2015  = amd + cjs
+------------------------------------------------------------
+5.System :2007 = AMD = CJS + ES 6
+6.UMD :2008 = NAMESPACE + AMD + CJS = ES 6
+....................................................................................
+				Commonjs-CJS
+.....................................................................................
+
+How to share code? How to import code?
+
+ Code:
+  Could be variables,functions,classes.
+  Variables can have any literal string,numbers,boolean,objects,functions...
+
+src
+  |
+  subfolders
+|
+index.js
+
+Sharing code :
+
+Keywords
+exports
+module.exports
+
+Imporing code:
+require('fileName')
+require('folderName/fileName')
+
+exports:
+ Used to share more code from the single file.
+ exports packs the entire code into one single js object and returns that object
+
+//pack the code 
+exports.firstName = 'Subramanian'
+exports.lastName = 'Murugan'
+exports.salary = 1000
+exports.status = true
+exports.address = {
+    city: 'Coimbatore'
+}
+exports.skills = ['Java','JavaScript','Node.js']
+
+
+require:
+  It is a function which returns what ever we exported from the file.
+
+const obj= require('fileName')
+
+
+
+src/util.myutil.js
+
+//pack the code 
+exports.firstName = 'Subramanian'
+exports.lastName = 'Murugan'
+exports.salary = 1000
+exports.status = true
+exports.address = {
+    city: 'Coimbatore'
+}
+exports.skills = ['Java', 'JavaScript', 'Node.js']
+exports.saySomething = () => "something"
+
+src/index.js
+//access the code from the myutil.js 
+const res = require('./util/myutil')
+console.log(res)
+
+console.log(`${res.firstName} ${res.lastName} ${res.address.city} ${res.salary}`)
+console.log(`${res.skills} ${res.status} ${res.saySomething()}`)
+
+node src/index.js
+{
+  firstName: 'Subramanian',
+  lastName: 'Murugan',
+  salary: 1000,
+  status: true,
+  address: { city: 'Coimbatore' },
+  skills: [ 'Java', 'JavaScript', 'Node.js' ],
+  saySomething: [Function (anonymous)]
+}
+Subramanian Murugan Coimbatore 1000
+Java,JavaScript,Node.js true something
+....................................................................................
+				module.exports
+....................................................................................
+
+Export only one item from the file.
+
+eg"
+ if you want to share  "Class"
+ if you want to share "array"
+
+
+src/services/todo.service.js
+
+class TodoService {
+    constructor() {
+
+    }
+    //biz apis
+    save() {
+        return 'save'
+    }
+    findAll() {
+        return 'findAll'
+    }
+    find() {
+        return 'find'
+    }
+    remove() {
+        return 'remove'
+    }
+}
+// module.exports = TodoService
+
+//return object 
+module.exports = new TodoService()
+
+
+src/index.js
+// const TodoService = require('./services/todo.service')
+const todoService = require('./services/todo.service')
+
+// let service = new TodoService()
+
+// console.log(service.save())
+// console.log(service.findAll())
+
+console.log(todoService.save())
+console.log(todoService.findAll())
+
+.................................................................................
+				 Returning data
+.................................................................................
+
+src/mockdata/todo.mock.js
+
+
+const TODOS = require('../mockdata/todo')
+class TodoService {
+    constructor() {
+
+    }
+    //biz apis
+    save() {
+        return 'save'
+    }
+    findAll() {
+        return TODOS
+    }
+    find() {
+        return 'find'
+    }
+    remove() {
+        return 'remove'
+    }
+}
+// module.exports = TodoService
+
+//return object 
+module.exports = new TodoService()
+
+src/index.js
+// const TodoService = require('./services/todo.service')
+const todoService = require('./services/todo.service')
+
+// let service = new TodoService()
+
+// console.log(service.save())
+// console.log(service.findAll())
+
+console.log(todoService.save())
+console.log(todoService.findAll())
+
+.....................................................................................
+			   ES 6 module pattern
+.....................................................................................
+
+How to share code and how to import code?
+
+export,export default == exports and module.exports
+
+import === require()
+
+src/util/mylib.js
+
+//pack the code 
+//exports.firstName = 'Subramanian'
+export const firstName ='Subramanian'
+export const lastName = 'Murugan'
+export const salary = 1000
+export const status = true
+export const address = {
+    city: 'Coimbatore'
+}
+export const skills = ['Java', 'JavaScript', 'Node.js']
+export const saySomething = () => "something"
+
+src/index.js
+import { firstName,lastName,salary } from "./util/mylib";
+
+console.log(firstName,lastName,salary)
+
+node src/index.js
+(node:17360) Warning: To load an ES module, set "type": "module" in the package.json or use the .mjs extension.
+(Use `node --trace-warnings ...` to show where the warning was created)
+E:\session\IBM\2022\sep\nodejsmicroservice\moduleapps\src\index.js:1
+import { firstName,lastName,salary } from "./util/mylib";
+^^^^^^
+
+SyntaxError: Cannot use import statement outside a module
+    at Object.compileFunction (node:vm:352:18)
+    at wrapSafe (node:internal/modules/cjs/loader:1033:15)
+    at Module._compile (node:internal/modules/cjs/loader:1069:27)
+    at Object.Module._extensions..js (node:internal/modules/cjs/loader:1159:10)
+    at Module.load (node:internal/modules/cjs/loader:981:32)
+    at Function.Module._load (node:internal/modules/cjs/loader:822:12)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:77:12)
+    at node:internal/main/run_main_module:17:47
+
+Node.js does not support es6 modules directly....
+
+
+How to run es 6 modules in node?
+
+There are two patterns
+
+1.using build tools
+2.modern node js require some configuration inside a file called "package.json"
+
+You have to create package.json file 
+
+E:\session\IBM\2022\sep\nodejsmicroservice\moduleapps>npm init --y
+Wrote to E:\session\IBM\2022\sep\nodejsmicroservice\moduleapps\package.json:
+
+{
+  "name": "moduleapps",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+.................................................................................
+
+package.json
+{
+  "name": "moduleapps",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
+
+
+while importing file "fileName.js" must be given.
+
+import { firstName,lastName,salary } from "./util/mylib.js";
+
+console.log(firstName,lastName,salary)
+.....................................................................................
+			 export default
+
+To export only one thing at a time.
+
+Usefull for class,functions,mockdata exporting....
+
+
+src/services/customer.service.js
+
+// export default class CustomerService {
+//     constructor() {
+
+//     }
+//     findAll() {
+//         return 'customers'
+//     }
+// }
+
+class CustomerService {
+    constructor() {
+
+    }
+    findAll() {
+        return 'customers'
+    }
+}
+
+export default CustomerService;
+
+
+src/index.js
+
+import { firstName, lastName, salary } from "./util/mylib.js";
+import CustomerService from './services/customer.service.js'
+
+console.log(firstName, lastName, salary)
+let custService = new CustomerService()
+console.log(custService.findAll())
+
+.....................***********************......................................
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
