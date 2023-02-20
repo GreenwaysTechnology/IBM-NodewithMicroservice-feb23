@@ -1,0 +1,69 @@
+			     Javascript fundamentals
+...................................................................................
+
+What is node js?
+   Node.js is platform and runtime.
+   Node.js is used to run javascript applications in standalone.
+
+Javascript can be executed in two env.
+
+1.Browser
+   Every web browser has embeded js engine/runtime,where we can js code
+2.standalone
+   Outside web browser we have js runtime(node),where we can js code.
+
+
+....................................................................................
+ 			 ES 6 fundamentals
+....................................................................................
+
+what is node.js?
+  It is runtime for running js apps
+
+What is Java script?
+ Javascript is one of the most popular programming language.
+ Javascript is Object based, functional style programming language.
+
+Java script language standarized by the Committe "ECMA" - European computer manfacturing assocation.
+
+In 1995, javascript language created by Brendan Eich
+ at Netscap Communication.
+
+Once the language created by Brendan Eich,The language submitted to the committe called ECMA For standarization.
+
+According to ECMA
+1.ES 1.0  -97
+2.ES 3.0 -99
+3.ES 4.0 -2006
+4.ES 5.0 -2007
+   During this period, Node.js was created.
+5.ES 6/ECMA 2015 - 2012-2015
+
+6.ES 7-2017
+etc...
+
+ES 6 Features:
+.............
+1.language fundamentals
+2.functions
+3.object based concepts and implementations
+....
+Modularity
+ -Commonjs
+ -ES 6 Modularity.
+...................................................................................
+
+Project setup:
+E:\session\IBM\2022\sep\nodejsmicroservice>mkdir jsapps
+
+E:\session\IBM\2022\sep\nodejsmicroservice\>cd jsapps
+
+
+E:\session\IBM\2022\sep\nodejsmicroservice\jsapps>mkdir src
+
+E:\session\IBM\2022\sep\nodejsmicroservice\es6app>code .
+
+src/index.js
+console.log("Hello,Node.js")
+
+E:\session\IBM\2022\sep\nodejsmicroservice\es6app>node src/index.js
