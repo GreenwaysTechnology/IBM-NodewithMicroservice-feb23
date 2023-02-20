@@ -45,3 +45,6 @@ auth('admin', 'admin', (status) => {
 })
 auth('admin', 'admin', status => console.log(status),
     err => console.log(err))
+    
+auth('foo', 'bar', status => console.log(status),
+    err => console.log(err))

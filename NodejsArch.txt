@@ -1,0 +1,68 @@
+				Node.js Architecture
+.....................................................................................
+
+What is Node.js?
+
+ Node.js is a platform to run js code outside web browser.
+ Platform means collection of tools,libs/apis,runtime in order to build end to end apps.
+
+Why Node.js Was Created?
+
+ Before Node.js, There was no arch for building application particullar network based apps using nonblocking /async programming model.
+
+
+How programs works?
+
+Program is collection of instructions
+
+Program has two types
+
+1.source program 
+   The program is written any language
+2.compiled program
+   The program is compiled by compiler of any language
+
+The compiled program is executed ; loading on main memory so that cpu can access.
+
+in order to run the program , we need another program - process/Runtime.
+
+The process runs the program always sequentially- line by line.
+
+eg:
+ instructions1 -----|running---
+ instructions2
+ instructions3
+ instructionsN
+     |
+  Process(runtime)
+
+while instructions1 is running,the instructions2 cant be executed - Blocking
+
+instructions2 is blocked because of instruction1
+
+instructions1 lets say would be io call (reading from the file,or from network socket socket)
+ 
+can we run all instructions simultaneously?
+ Yes!
+Threads
+ 
+ T1--instructions1 -----|running---
+ T2--instructions2
+ T3--instructions3
+ TN--instructionsN
+.....................................................................................
+				IO
+....................................................................................
+
+
+
+
+
+
+
+
+
+
+
+
+
