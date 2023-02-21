@@ -472,7 +472,7 @@ There are two patterns
   
 
 
-//create object : using functtions:
+//create object : using functions:
 
 //es 5 style class declaration : using functions 
 

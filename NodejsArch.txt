@@ -1,5 +1,3 @@
-				Node.js Architecture
-.....................................................................................
 
 What is Node.js?
 
@@ -11,48 +9,248 @@ Why Node.js Was Created?
  Before Node.js, There was no arch for building application particullar network based apps using nonblocking /async programming model.
 
 
-How programs works?
+Programm
+main(){
+ 1.task-1 -method -is being executed
+ 2.task-2 -method
+ 3.task-3 -method
+ 4.task-N -method
+}
 
-Program is collection of instructions
+Blocking:
+ when task-1 is running long time because of "IO Or CPU intensive task"
+ task-2,task-3,task-4...keep on waiting - This is called as blocking
 
-Program has two types
+All the tasks are executed by a thread(main thread) -  this is called thread is blocked.
 
-1.source program 
-   The program is written any language
-2.compiled program
-   The program is compiled by compiler of any language
+What will happen when you block a thread?
 
-The compiled program is executed ; loading on main memory so that cpu can access.
+=>You cant run other tasks
+=>if a thread is blocked long time, "resource" would be waste
 
-in order to run the program , we need another program - process/Runtime.
+Solutions:
 
-The process runs the program always sequentially- line by line.
+1.Why cant run application concurrently(parrell)
+ Each task can be executed in a separate thread of execution, so that main thread will not be blocked.
 
-eg:
- instructions1 -----|running---
- instructions2
- instructions3
- instructionsN
-     |
-  Process(runtime)
+Based on this arch only,Web servers are working, Web Servers was designed based on this arch.
+                   "Request Per Thread Model"
 
-while instructions1 is running,the instructions2 cant be executed - Blocking
+Solution for multi threading Blocking Model:
 
-instructions2 is blocked because of instruction1
+1.Non blocking io arc /Async 
+  
+A.Having limitied no of threads with max concurrency
 
-instructions1 lets say would be io call (reading from the file,or from network socket socket)
- 
-can we run all instructions simultaneously?
- Yes!
-Threads
- 
- T1--instructions1 -----|running---
- T2--instructions2
- T3--instructions3
- TN--instructionsN
+                      "Non Blocking io apis"
+
+Evented IO / Event Driven Programming model
+
+How to limit by reducing threads, achiving more concurrency.
+.................................................................................
 .....................................................................................
-				IO
+				 File Descriptors
+.....................................................................................
+
+1.File descriptors is  program written in c language- array
+2.File descriptor is associated with every process on os- if you run more than one process - will have more file descriptor table
+
+FD arch:
+Integer value	Name	<unistd.h> symbolic constant[1]	<stdio.h> file stream[2]
+0	Standard input	STDIN_FILENO	stdin
+1	Standard output	STDOUT_FILENO	stdout
+2	Standard error	STDERR_FILENO	stderr
+
+ data= readFile() -----|running---
+ calculate()
+ add()
+ mulitply()
+
+
+Process:
+1.we use language high level api to start reading file from the disk
+  java:
+   FileInputStream fins= newFileInputStream("c:/tmp/version.txt")
+   fins.read()
+
+ java uses read api--------|jvm----will call c api(os api)---->kernal--fd
+
+2.we use language high level api to start reading data from the network(Remote computer)
+  java:
+ java uses readSocket------i--------|jvm----will call c api(os api)---->kernal--fd
+
+..................................................................................
+
+Network io and web server:
+
+Any web server if you take, it works based on io model- socket-network io.
+
+Traditional web server,  for every client request is  handled inside server by a thread.
+
+                    "Request Per Thread model"
+			
+.....................................................................................
+Drawbacks of Request Per Thread Model.
+   1000 req = 1000 thread
+   1 million req = 1 million threads
+
+if webserver starts receiving more and more load, they cant handle request.
+The problem was called as "C10K" Problem
+
+c10k Problem:
+The C10k problem is the problem of optimizing network sockets to handle a large number of clients at the same time. The name C10k is a numeronym for concurrently handling ten thousand connections.
+ 
+ if a webserver handles 10 thousand connections(threads) at the same time , it is good webserver".
+
 ....................................................................................
+        C10k Problem aims to handle more request with min "Resource"
+....................................................................................
+
+Here Resource means threads.
+How to reduce thread to handle more users.
+ Having limited no of threads how to handle more request.
+
+Why should i reduce thread? what is problem with threads?
+
+Evils of Thread:
+ ->Thread is subject to memory.
+ ->Thread is subject to cpu, cpu need to do lot of ctx switch.
+ ->Thread inter communication causes thread dead locks
+....................................................................................
+Solution:
+ Having  a limited no of threads , at least one or two.
+
+In 2000, The linux operating system introduced an api which is non blocking io api 
+
+1.select + read
+  In this model thread is not blocked because of io, but thread has to make an explicit read call for data ,once the data is ready.
+  because of this another api been introduced
+
+2.poll
+  Poll eleminated extra read call from the application. rather kernal push the data when is available - Event Driven Programming model.
+
+3.EPoll:
+  It is a framework, introduced in linux to handle non blocking operations using event driven programming model.
+
+monitoring   multiple file descriptors to see if I/O is possible on any of
+       them.  
+EPoll introduced a concept called "event loop"
+
+event loop syntax:
+ for (;;) {
+
+
+
+ }
+
+Event Loop:
+
+Any similar arch/technology available today like node.js?
+
+Java - with Netty
+Java with Vertx
+Java with Quarkus
+
+What type apps we can build using Node.js?
+
+You can build  concurrent non blocking network io apps...
+.....................................................................................
+
+Node.js platform has been built on 
+
+Google v8 : javascript engine  to execute js program
+libuv :  It is operating system non blocking abstractions
+
+Node.js is multi threaded? or single threaded?
+
+No!
+
+Node is mult threaded.
+
+Node provides two types of threads
+
+1.Event loop thread 
+   Node has only one event loop thread
+ Event loop thread only handles non blocking IO - Socket IO(NETWORK IO)
+
+2.Worker pool threads
+  Node has dedcited more no of threads called "worker pool threads"
+  
+ Use case:
+   To run non blocking "file io"
+   To Run blocking code and blocking io operations.
+..................................................................................
+			C10K Problem solved succfully in node.js
+
+   Having single event loop thread handles concurrent more no network requests
+Event Loop:
+
+Any similar arch/technology available today like node.js?
+
+Java - with Netty
+Java with Vertx
+Java with Quarkus
+
+What type apps we can build using Node.js?
+
+You can build  concurrent non blocking network io apps...
+
+....................................................................................
+
+Node.js platform has been built on 
+
+Google v8 : javascript engine  to execute js program
+libuv :  It is operating system non blocking abstractions
+
+Node.js is multi threaded? or single threaded?
+
+No!
+
+Node is mult threaded.
+
+Node provides two types of threads
+
+1.Event loop thread 
+   Node has only one event loop thread
+ Event loop thread only handles non blocking IO - Socket IO(NETWORK IO)
+
+2.Worker pool threads
+  Node has dedcited more no of threads called "worker pool threads"
+  
+ Use case:
+   To run non blocking "file io"
+   To Run blocking code and blocking io operations.
+...................................................................................
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
