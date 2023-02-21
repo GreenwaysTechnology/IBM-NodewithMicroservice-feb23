@@ -1,0 +1,511 @@
+				Node Platform apis
+.....................................................................................
+Node Modules - common js:
+
+Types of modules:
+
+1.Custom module
+  built by us
+2.built in modules
+   provided by node.js  
+3.provided by third party/community
+  libs,frameworks
+
+
+Built in Modules:
+.................
+File System io
+Networking
+os
+etc...
+https://nodejs.org/dist/latest-v16.x/docs/api/
+
+...................................................................................
+			1.os 
+
+The os module provides operating system-related utility methods and properties. It can be accessed using:
+const os = require('os')
+
+console.log(os.arch())
+console.log(os.cpus())
+console.log(os.freemem())
+console.log(os.hostname())
+console.log(os.totalmem())
+....................................................................................
+
+./ vs ''
+.........
+
+ require('./services/TODOService');
+  ->here you can see ./
+  ./ -current dir
+
+ require('os'); => 
+  -here no ./ 
+
+Why?
+
+Note : if you are java devp, you know the classpath , how it works?
+
+
+require('os');
+
+Node internally uses a search algorthim,node always looks the folder called
+ "node_modules" in the current project, if not , then it searches, the node in built 
+installtion folder---c:/pf/node/node_modules--if it finds it will pick up from there else it will throw error.
+
+require('./services/TODOService');
+   it will lookup in the current dir or sub dirs only.
+
+nternal/modules/cjs/loader.js:800
+    throw err;
+    ^
+
+Error: Cannot find module 'osxx'
+Require stack:
+- C:\session\ibm\feb\nodems\mynodeapps\src\index.js
+[90m    at Function.Module._resolveFilename (internal/modules/cjs/loader.js:797:15)[39m
+[90m    at Function.Module._load (internal/modules/cjs/loader.js:690:27)[39m
+[90m    at Module.require (internal/modules/cjs/loader.js:852:19)[39m
+[90m    at require (internal/modules/cjs/helpers.js:74:18)[39m
+    at Object.<anonymous> (C:\session\ibm\feb\nodems\mynodeapps\src\index.js:1:32)
+[90m    at Module._compile (internal/modules/cjs/loader.js:959:30)[39m
+[90m    at Object.Module._extensions..js (internal/modules/cjs/loader.js:995:10)[39m
+[90m    at Module.load (internal/modules/cjs/loader.js:815:32)[39m
+[90m    at Function.Module._load (internal/modules/cjs/loader.js:727:14)[39m
+[90m    at Function.Module.runMain (internal/modules/cjs/loader.js:1047:10)[39m {
+  code: [32m'MODULE_NOT_FOUND'[39m,
+  requireStack: [ [32m'C:\\session\\ibm\\feb\\nodems\\mynodeapps\\src\\index.js'[39m ]
+}
+.....................................................................................
+			  Events
+
+Node.js is event driven arch, some program emits events called emitter and some program lisents for those events called "listeners".
+
+Using events module we can build event programming model.
+
+As of now , we are going to discuss simple events with in objects, later in microservices we will see the distributed event driven arch.
+
+Much of the Node.js core API is built around an idiomatic asynchronous event-driven architecture in which certain kinds of objects (called "emitters") emit named events that cause Function objects ("listeners") to be called.
+
+For instance: a net.Server object emits an event each time a peer connects to it; a fs.ReadStream emits an event when the file is opened; a stream emits an event whenever data is available to be read.
+
+const EventEmitter = require('events')
+
+class Sales extends EventEmitter {
+    constructor() {
+        super()
+        //event registeration
+        this.on('sales', (evt) => {
+            console.log(evt)
+        })
+    }
+    sale(product) {
+     //emit event
+      this.emit('sales',product)
+    }
+}
+function main() {
+    let sales = new Sales()
+    sales.sale({ id: 1, name: 'Phone', qty: 10, price: 10000 })
+}
+main()
+....................................................................................
+			  IO apis
+....................................................................................
+1.file system io
+   file system io , how to read data from disk file
+2.network io
+
+
+File System IO:
+=>We can read and write files from the disk in  two ways
+  1.blocking way
+  2.nonblocking way
+=>We can read and write files using two mode
+  1.NonStreaming mode
+  2.Streaming mode
+=>All file operations are handled by
+  "Worker Threads" from Worker Thread Pool - either it is blocking or non blocking    io.
+=>Files are handled using callback style or promise style.
+=>Files operations are handled by "fs" module
+
+.....................................................................................
+			 File system operations
+....................................................................................
+
+How to read File using nonblocking pattern?
+
+fs.readFile(path[, options], callback)
+
+path <string> | <Buffer> | <URL> | <integer> filename or file descriptor
+options <Object> | <string>
+ encoding <string> | <null> Default: null
+ flag <string> See support of file system flags. Default: 'r'.
+ signal <AbortSignal> allows aborting an in-progress readFile
+
+callback <Function>
+  err <Error> | <AggregateError>
+  data <string> | <Buffer>
+
+const fs = require('fs')
+
+const blockMe = message => console.log(message)
+//read file 
+const filePath = './src/assets/info.txt'
+const options = {
+    encoding: 'UTF-8'
+}
+blockMe('start')
+fs.readFile(filePath, options, (err, data) => {
+    if (err) throw err
+    console.log(data)
+})
+blockMe('end')
+
+How to read File using blocking pattern?
+
+const fs = require('fs')
+
+const path = './src/assets/info.txt'
+
+const options = {
+    encoding: 'UTF-8'
+}
+
+function blockMe(message) {
+    console.log(message)
+}
+//async api to read file
+blockMe('start')
+const data = fs.readFileSync(path, options)
+console.log(data)
+blockMe('end')
+
+....................................................................................
+  	 How to write data into file using blocking and nonblocking
+                         way
+.....................................................................................
+
+NonBlocking write Operations:
+...........................
+const fs = require('fs')
+
+const filePath = './src/assets/greet.txt';
+
+
+const options = {
+    encoding: 'UTF-8'
+}
+
+function blockMe(message) {
+    console.log(message)
+}
+//write file in non blocking way 
+
+blockMe('start')
+const data = 'Hello,How are you?'
+fs.writeFile(filePath, data, options, err => {
+    if (err) throw err;
+    console.log(`data has been written into ${filePath}`)
+})
+blockMe('end')
+
+Blocking Operations with file write:
+.....................................
+
+const fs = require('fs')
+
+const options = {
+    encoding: 'UTF-8'
+}
+
+function blockMe(message) {
+    console.log(message)
+}
+//blocking way of writing data
+const newFilePath = './src/assets/hello.txt';
+
+blockMe('start')
+fs.writeFileSync(newFilePath, data, options)
+blockMe('end')
+...............
+
+
+How to use path module? and global variables
+
+
+The path module provides utilities for working with file and directory paths.
+
+-node provides lot of global variables
+
+__dirname  : current directory name
+C:\session\ibm\2021\june\nodemicroservices\nodeapps\src
+
+__filename :current directory name + fileName
+C:\session\ibm\2021\june\nodemicroservices\nodeapps\src\index.js
+.........................
+
+const fs = require('fs');
+const path = require('path')
+
+// const filePath = './src//assets/info.txt'
+const filePath = path.join(__dirname,'assets/info.txt')
+
+const options = {
+    encoding: 'UTF-8'
+}
+
+function blockMe(message) {
+    console.log(message)
+}
+//async api to read file
+blockMe('start')
+fs.readFile(filePath, options, (err, data) => {
+    if (err) throw err
+    console.log(data)
+})
+blockMe('end')
+.....................................................................................
+Mode of fs read and write:
+.........................
+
+1.Non Streaming Mode
+
+2.Streaming  Mode
+
+1.Non Streaming Mode
+
+  only file io is supported, network io not supported
+
+ -once file is read, the entire file is loaded into node process buffer(memory), then it will be delivered to caller.
+
+-if more files are loaded into node process, node process gets crashed.
+
+-non streaming mode is not suitable for large and big files read or write operation.
+
+fs.readFile() and fs.writeFile are non streaming apis.
+
+
+2.Streaming apis:
+   supported by fs and also network apis
+
+
+-Streaming is nothing but flow of data(chunks).
+-Streaming allows move the data from one place to another place one by one.
+-Streaming apis are other wise called evented io. which is powered events.
+
+
+Types of Streams:
+
+1.Readable Stream : input
+2.Writeable stream : output
+3.Duplex stream : read + write
+
+Node has lot of built in stream apis
+....................................
+
+Built in readable Streams:
+
+-HTTP responses, on the client
+-HTTP requests, on the server
+-fs read streams
+-zlib streams
+-crypto streams
+-TCP sockets
+-child process stdout and stderr
+-process.stdin
+
+Writable Streams:
+
+-HTTP requests, on the client
+-HTTP responses, on the server
+-fs write streams
+-zlib streams
+-crypto streams
+-TCP sockets
+-child process stdin
+-process.stdout, process.stderr
+
+
+All streaming apis are powered with events
+node io streams has built in events.
+events are emitted by node.
+Our programs are listeners
+
+
+Common events in all io
+.........................
+
+
+1.data event:
+ which is emitted by node, for each chunk.
+
+2.close event:
+  The 'close' event is emitted when the stream and any of its underlying resources (a file descriptor, for example) have been closed.
+
+3.end event:
+ The 'end' event is emitted when there is no more data to be consumed from the stream.
+
+4.Event: 'error'
+ The 'error' event may be emitted by a Readable implementation at any time
+Typically, this may occur if the underlying stream is unable to generate data due to an underlying internal failure, or when a stream implementation attempts to push an invalid chunk of data.
+
+
+
+//reading files using streaming pattern
+const fs = require('fs')
+const path = require('path')
+
+const filePath = path.join(__dirname, 'assets/info.txt')
+
+const options = {
+    encoding: 'UTF-8'
+}
+
+const inputStream = fs.createReadStream(filePath, options)
+
+//attach events for io 
+let data = ''
+inputStream.on('data', chunk => {
+    //console.log(chunk)
+    data += chunk
+})
+
+inputStream.on('end', () => {
+    console.log('end event is called')
+    console.log(data)
+})
+inputStream.on('close', () => {
+    console.log('close event is called')
+})
+inputStream.on('error', (err) => {
+    console.log('error event', err)
+})
+..........
+const fs = require('fs');
+const path = require('path');
+
+const fileName = path.join(__dirname, 'assets/grains.txt');
+
+const config = {
+    encoding: 'utf8',
+    flag: 'w'
+};
+const outputStream = fs.createWriteStream(fileName, config);
+
+const grains = ['wheat', 'rice', 'oats'];
+
+grains.forEach(grain => {
+    outputStream.write(grain + " ");
+    console.log("Wrote: %s", grain);
+});
+
+outputStream.close();
+
+outputStream.on('close', function () {
+    console.log('file has been closed ')
+})
+...................................................................................
+.....................................................................................
+				Back Pressure
+....................................................................................
+
+When input stream and output stream works together.
+
+Backpressure:
+Problems when you do read and write together
+
+1. In general read operation is faster than write operation
+
+
+Back Pressure means inputstream is fast, outputstream slow, then data will be
+lost.
+
+
+How to handle back pressure?
+
+ apis  : pause,resume,drain event
+
+pause : to close the upstream, not to emit data
+resume : to open the open upstream , to emit data
+
+drain event: if drain event is called.
+
+
+in order to test back pressure, we need big files
+
+Create big file code:
+//big file creation
+const fs = require('fs');
+const path = require('path')
+
+const filePath = path.join(__dirname, "assets/big.file")
+
+const file = fs.createWriteStream(filePath);
+
+for (let i = 0; i <= 1e6; i++) {
+    file.write('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n');
+}
+
+file.end();
+.................
+How to handle back pressure using pause,resume,drain?
+
+const fs = require('fs');
+const path = require('path');
+
+const inputfileName = path.join(__dirname, 'assets/big.file');
+const outputfileName = path.join(__dirname, 'assets/bigcopy.file');
+
+const config = {
+    encoding: 'UTF-8'
+}
+const readerStream = fs.createReadStream(inputfileName, config);
+const writeStr = fs.createWriteStream(outputfileName, config);
+
+
+readerStream.on('data', function (chunk) {
+    console.log(`Received ${chunk.length} bytes of data.`);
+    let buffer_good = writeStr.write(chunk);
+    if (!buffer_good) readerStream.pause();
+});
+
+writeStr.on('drain', function () {
+    console.log('buffer drained!');
+    readerStream.resume();
+});
+readerStream.on('end', function () {
+    //console.log(data);
+});
+
+readerStream.on('error', function (err) {
+    console.log(err.stack);
+});		...................................................................................
+	   Pipe method to eleminate backpressure apis(drain,resume,pause)
+...................................................................................
+const fs = require('fs');
+const path = require('path');
+
+const inputfileName = path.join(__dirname, 'assets/big.file');
+//write
+const outputFileName = path.join(__dirname, 'assets/bigcopy.file');
+
+const config = {
+      encoding: 'UTF-8'
+}
+
+//Back pressure handling
+const readerStream = fs.createReadStream(inputfileName, config);
+const writeStr = fs.createWriteStream(outputFileName, config);
+
+//backPressure streams
+//pipe method is simplest method which wraps resume,pasuse,drain 
+readerStream.pipe(writeStr);
+
+.....................................................................................
+
+
+
+
+
