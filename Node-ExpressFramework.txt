@@ -1,0 +1,205 @@
+			Third Party Frameworks
+.....................................................................................
+			    Express.js
+....................................................................................
+What is express.js
+  Express.js is the first web framework built for node js and built by node js core team.
+  Express.js is wrapper around core http module.
+  Express is abstraction for creating Web Applications for node http core module.
+
+Express can be used to small to medium scale apps only.
+
+Types of apps we can build using express.js
+
+1.Dynamic web apps
+2.Rest apis
+
+How to write express apps?
+
+1.using vannila node project and install express framework
+2.using express generator - tool used to create express apps.
+
+express core concepts:
+ In express everything object
+
+express - function
+  used to create express objects
+
+1.Application 
+2.Request
+3.Response
+4.Router
+
+1.Application Object
+  =>It represents the whole express app
+  =>It is container object which contains other objects
+  =>It is created by calling express function
+  =>Per Application only one app instance
+
+Application Object
+  =>You can expose the global end points
+  =>You configure middlewares
+  =>you can render views
+  =>you can register template engines
+  =>You can start web container...		
+
+Steps:
+
+mkdir express-app
+cd express-app
+npm init
+npm install express
+
+
+const express = require('express')
+// console.log(express)
+//create application object
+const app = express()
+
+//console.log(app) 
+//apis 
+//home page
+app.get('/', (req, res) => {
+    res.end('Home')
+})
+//todos 
+app.get('/api/todos', (req, res) => {
+    res.end('todos')
+})
+app.post('/api/todos', (req, res) => {
+    res.end('todos post')
+})
+app.put('/api/todos', (req, res) => {
+    res.end('todos put')
+})
+app.delete('/api/todos', (req, res) => {
+    res.end('todos delete')
+})
+//users
+app.get('/api/users', (req, res) => {
+    res.end('users')
+})
+app.post('/api/users', (req, res) => {
+    res.end('users post')
+})
+
+app.put('/api/users', (req, res) => {
+    res.end('users put')
+})
+app.delete('/api/users', (req, res) => {
+    res.end('users delete')
+})
+//start express server
+app.listen(3000, () => {
+    console.log('Express Server is listening')
+})
+..................................................................................
+			...................................................................................
+				Resources
+
+When we build rest apis, apis are classified based on resources(domains)
+each resource has get,post,delete,put end points.
+
+In order to build resource based apps, we need to modularize the app.
+
+users
+todos
+comments
+customers
+
+How to modularize?
+
+ src
+  |
+  routers
+    |
+    todos
+    users
+    customers
+ services
+    todos
+    users
+ app.js/index.js -root app
+
+
+
+Eg:
+ service
+
+const todos = require('../mockdata/todos')
+
+class TodoService {
+    constructor() { }
+    findAll() {
+        return Promise.resolve(todos)
+    }
+}
+module.exports = new TodoService()
+
+router
+
+const express = require('express')
+const { findAll } = require('../services/todo.service')
+
+const todoRouter = express.Router()
+
+//GET /api/todos
+todoRouter.get('', async (req, res) => {
+    try {
+        const todos = await findAll()
+        res.status(200).json(todos)
+    }
+    catch (err) {
+        res.status(400).json(err)
+    }
+
+})
+//GET /api/todos/list
+todoRouter.get('/list', async (req, res) => {
+    try {
+        const todos = await findAll()
+        res.status(200).json(todos)
+    }
+    catch (err) {
+        res.status(400).json(err)
+    }
+
+})
+//GET /api/todos/save
+todoRouter.post('/save', (req, res) => {
+    res.end('todos post')
+})
+//GET /api/todos/update
+todoRouter.put('/update', (req, res) => {
+    res.end('todos put')
+})
+//GET /api/todos/update
+todoRouter.delete('/remove', (req, res) => {
+    res.end('todos delete')
+})
+
+module.exports = todoRouter
+.....................................................................................
+const express = require('express')
+const app = express()
+const todosRouter = require('./routers/todos.router')
+
+//configure routers with app object so that , request will be dispatched to routers
+
+app.use('/api/todos',todosRouter)
+
+//Global apis 
+app.get('/', (req, res) => {
+    res.end('Home')
+})
+
+//start express server
+app.listen(3000, () => {
+    console.log('Express Server is listening')
+})
+.............................&&&&&&&&&&&&&&&&&&.....................................
+
+
+
+
+
