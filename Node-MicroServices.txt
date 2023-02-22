@@ -401,3 +401,358 @@ async function main() {
     }
 }
 main()
+.....................................................................................
+				   actions
+....................................................................................
+				 actions Syntax:
+
+1.normal pattern
+
+   actions: {
+        multiply(ctx) {
+            const a = ctx.params.a
+            const b = ctx.params.b
+            return a * b
+        }
+    }
+
+2.expanded Pattern
+    -This pattern is very usefull for having additional information for a methods.
+     or meta information.
+
+ params validation,cache,fallback---extra  information
+
+const { ServiceBroker } = require('moleculer')
+const broker = new ServiceBroker()
+
+//declare service
+broker.createService({
+    name: 'hello',
+    actions: {
+        //args
+        // sayHello(ctx) {
+        //     console.log(ctx)
+        //     const { message } = ctx.params
+        //     //return `${ctx.params.message},MicroService`
+        //     return `${message},MicroService`
+        // }
+        //expanded syntax
+        sayHello: {
+            //logic of the method will go inside handler
+            handler(ctx) {
+               const { message } = ctx.params
+               return `${message} MicroService`
+            }
+        }
+    }
+})
+
+async function main() {
+    try {
+        await broker.start()
+        const hello = await broker.call('hello.sayHello', { message: 'Hello' })
+        console.log(hello)
+
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+main()
+
+Actions Meta Data:
+..................
+Params Validation
+const { ServiceBroker } = require('moleculer')
+const broker = new ServiceBroker()
+
+//declare service
+broker.createService({
+    name: 'math',
+    actions: {
+        add: {
+            //meta information: validation information
+            params: {
+                a: { type: 'number' },
+                b: { type: 'number' }
+            },
+            handler(ctx) {
+                const { a, b } = ctx.params
+                return a + b
+            }
+        }
+    }
+})
+
+async function main() {
+    try {
+        await broker.start()
+         const result = await broker.call('math.add', { a: 10, b: 20 })
+        // const result = await broker.call('math.add', { a: "10", b: 20 })
+
+        console.log(result)
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+main()
+.....................................................................................
+....................................................................................
+		    Dynamic Parameters and dynamic invocation of services
+...................................................................................
+
+Moleculer has a tool called "Moleculer REPL"
+>npm install moleculer-repl --save
+
+
+
+const { ServiceBroker } = require('moleculer')
+
+const broker = new ServiceBroker()
+
+broker.createService({
+    name: 'math',
+    actions: {
+        divide: {
+            //param validation logic
+            params: {
+                a: "number",
+                b: "number"
+            },
+            //biz logic 
+            handler(ctx) {
+                const a = ctx.params.a
+                const b = ctx.params.b
+                return a / b
+            }
+        }
+    }
+})
+
+
+async function main() {
+    try {
+        //start the broker 
+        await broker.start()
+        //use repl prompt
+        broker.repl()
+   
+    } catch (err) {
+        console.log(err)
+    }
+}
+main()
+
+mol $ call math.divide --a 10000 --b 234
+>> Call 'math.divide' with params: { a: 10000, b: 234 } with meta: { '$repl': true } with options: {}
+>> Execution time:4ms
+>> Response:
+42.73504273504273
+	     .....................................................................................
+			     Service Communication
+.....................................................................................
+
+Service Representation
+
+1.rpc 
+2.rest
+3.graphql
+
+Service communications
+
+1.rpc to rpc
+
+2.rest to rest
+
+2.rest to rpc
+
+
+Moleculer is microservice, generally microservices may be distributed across multiple machines(nodes) , which communicates via networks.
+....................................................................................
+.....................................................................................
+			     Service Communication
+.....................................................................................
+
+Service Representation
+
+1.rpc 
+2.rest
+3.graphql
+
+Service communications
+
+1.rpc to rpc
+
+2.rest to rest
+
+2.rest to rpc
+
+
+Moleculer is microservice, generally microservices may be distributed across multiple machines(nodes) , which communicates via networks.
+
+
+1.Service communication with in single broker
+
+2.Service communication across multiple service brokers
+
+Communication style
+
+1. can be sync
+2. can be async
+
+RPI style
+   method to method call
+Event driven style
+   methods communicates via events.
+
+
+
+Types of services:
+
+1.local service
+   service which is implemented on single broker.
+2.remote service
+   Service which is implemented across the brokers.
+ 
+Services can communicate within service broker-single node arch
+Services can communicate across service brokers - multi node arch
+
+How services are interacting each other?
+
+ Using "Context" Object
+
+Actors:
+
+ 1.Caller service, who is calling /consuming other services
+
+ 2.Callee service, who is called by others
+
+....................................................................................
+
+Use case: RPC TO RPC , within single Broker(Single Node)
+........................................................
+const { ServiceBroker } = require('moleculer')
+
+const broker = new ServiceBroker()
+
+broker.createService({
+    name: 'math',
+    actions: {
+        add: {
+            //param validation logic
+            params: {
+                a: "number",
+                b: "number"
+            },
+            //biz logic 
+            handler(ctx) {
+                const a = ctx.params.a
+                const b = ctx.params.b
+                //service to service communication via context object 
+                return ctx.call('adder.add', { a: a, b: b })
+            }
+        }
+    }
+})
+
+broker.createService({
+    name: 'adder',
+    actions: {
+        add: {
+            //param validation logic
+            params: {
+                a: "number",
+                b: "number"
+            },
+            //biz logic 
+            handler(ctx) {
+                const a = ctx.params.a
+                const b = ctx.params.b
+                return a + b
+            }
+        }
+    }
+})
+
+
+async function main() {
+    try {
+        //start the broker 
+        await broker.start()
+        //use repl prompt
+        broker.repl()
+
+    } catch (err) {
+        console.log(err)
+    }
+}
+main()
+
+How to test?
+node services/math.service.js
+
+mol $ call math.add --a 10 --b 20
+.....................................................................................
+			 Moleculer Repl Admin commands
+...................................................................................
+
+$nodes
+╔═══════════════════════════╤══════════╤═════════╤════════╤════════════════════╤══════════╤═════╗
+║ Node ID                   │ Services │ Version │ Client │ IP                 │    State │ CPU ║
+╟───────────────────────────┼──────────┼─────────┼────────┼────────────────────┼──────────┼─────╢
+║ laptop-r2tggfdl-72136 (*) │ 3        │ 0.14.26 │ nodejs │ 172.21.112.1  (+2) │  ONLINE  │ ?   ║
+╚═══════════════════════════╧══════════╧═════════╧════════╧════════════════════╧══════════╧═════╝
+It list how many nodes are running.
+
+..
+mol $ services
+╔═════════╤═════════╤══════════╤═════════╤════════╤═══════╗
+║ Service │ Version │    State │ Actions │ Events │ Nodes ║
+╟─────────┼─────────┼──────────┼─────────┼────────┼───────╢
+║ $node   │       - │    OK    │       7 │      0 │ 1     ║
+║ adder   │       - │    OK    │       1 │      0 │ 1     ║
+║ math    │       - │    OK    │       1 │      0 │ 1     ║
+╚═════════╧═════════╧══════════╧═════════╧════════╧═══════╝
+It list all services across the brokers.
+
+mol $ actions
+╔════════════════╤═══════╤══════════╤════════╤═══════════════════════════════════════════════════════════════════════════╗
+║ Action         │ Nodes │ State    │ Cached │ Params                                                                    ║
+╟────────────────┼───────┼──────────┼────────┼───────────────────────────────────────────────────────────────────────────╢
+║ $node.actions  │ (*) 1 │    OK    │   No   │ onlyLocal, skipInternal, withEndpoints, onlyAvailable                     ║
+║ $node.events   │ (*) 1 │    OK    │   No   │ onlyLocal, skipInternal, withEndpoints, onlyAvailable                     ║
+║ $node.health   │ (*) 1 │    OK    │   No   │                                                                           ║
+║ $node.list     │ (*) 1 │    OK    │   No   │ withServices, onlyAvailable                                               ║
+║ $node.metrics  │ (*) 1 │    OK    │   No   │ types, includes, excludes                                                 ║
+║ $node.options  │ (*) 1 │    OK    │   No   │                                                                           ║
+║ $node.services │ (*) 1 │    OK    │   No   │ onlyLocal, skipInternal, withActions, withEvents, onlyAvailable, grouping ║
+╟────────────────┼───────┼──────────┼────────┼───────────────────────────────────────────────────────────────────────────╢
+║ adder.add      │ (*) 1 │    OK    │   No   │ a, b                                                                      ║
+╟────────────────┼───────┼──────────┼────────┼───────────────────────────────────────────────────────────────────────────╢
+║ math.add       │ (*) 1 │    OK    │   No   │ a, b                                                                      ║
+╚════════════════╧═══════╧══════════╧════════╧═══════════════════════════════════════════════════════════════════════════╝
+It lists all actions across the service brokers.
+
+mol $ info
+
+=======================
+  General information
+=======================
+
+    CPU                      : Arch: x64, Cores: 12
+    Memory                   : [|||||--------------] 51 GB free
+    Heap                     : [-------------------] 16.8 MB
+    OS                       : win32 (Windows_NT)
+    IP                       : 172.21.112.1, 172.17.64.1, 192.168.1.8
+    Hostname                 : LAPTOP-R2TGGFDL
+
+    Node version             : v18.12.1
+    Moleculer version        : 0.14.26
+    Protocol version         : 4
+
+    Current time             : Thu Nov 10 2022 10:20:17 GMT+0530 (India Standard Time)
+
+======================
+It list all information related to your broker,os...
+..............................................................................................

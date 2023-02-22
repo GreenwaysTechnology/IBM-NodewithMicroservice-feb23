@@ -11,5 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "moleculer": "^0.14.28"
+  },
+  "devDependencies": {
+    "moleculer-repl": "^0.7.3"
   }
 }
