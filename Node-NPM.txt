@@ -1,0 +1,273 @@
+				NPM
+.....................................................................................
+
+What is npm?
+ npm is the world's largest software registry.
+ open source developers from every part of the world use npm to share and borrow packages.
+ many organizations use npm to manage private development as well.
+
+In js, you might have created lib/framework/utility, if you want to share to other developers in the world or within your organization or your team - npm helps.
+
+NPM consists of three components
+1.the website - used to discover packages, setup profiles and manage other aspects of npm
+
+2.CLI runs from the terminal, and how most developers interact with npm.
+
+3.registry - it is  large public database of js software and the meta information surrounding it.
+
+core concepts in npm:
+
+1.package
+2.module
+
+What is package?
+   A package is a file or directory that is described by a "package.json" file
+   A package must contain package.json file in order to be published to the npm    registry
+
+Package format:
+a.A folder containing a program described by a package.json.
+b.A gizpped tarball containing "a"
+c.A URL that resolves "a"
+
+Modules:
+ A module is any file or directory in the "node_modules" directory that can be loaded by the node.js require function
+
+ A javascript file
+
+modules need not have "package.json" file
+
+eg:
+ const http =require('http')
+
+ here the variable called http referes the 'http' module.
+
+
+....................................................................................
+....................................................................................
+				How to create npm package
+
+Steps:
+
+1.create folder
+>mkdir mynpm-apps
+>cd mynpm-apps
+>mkdir src
+
+2.create package.json
+
+Before create you have to ensure that npm has been installed.
+
+npm init <initalizer>
+
+npm init
+This utility will walk you through creating a package.json file.
+It only covers the most common items, and tries to guess sensible defaults.
+
+See `npm help init` for definitive documentation on these fields
+and exactly what they do.
+
+
+package.json
+
+{
+  "name": "mynpmapps",
+  "version": "1.0.0",
+  "description": "This is demo package",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "my",
+    "demo",
+    "package"
+  ],
+  "author": "Subramanian Murugan",
+  "license": "ISC"
+}
+
+name:
+ This is used to publish package into registry
+
+version:
+   if you publish package into registry, which is differentiated by "version"
+
+"1.0.0" - version no is based on the concept called "SEM Ver" concept- Semantic versioning.
+ Major.minor.patch
+
+main:
+  It is main file used /entry file in the package , generally it would index.js or main.js
+
+description:
+  It explains the nature of packages- what is this packge.
+
+Keywords:
+  Used to discover your packages using npm search command
+
+author:
+  Who is author of this package
+
+license:
+  You should specify a license for your package so that people know how they are permitted to use it.
+.................................................................................
+			   node_modules
+.................................................................................
+
+  it is folder , used to install any node packages, the node programm always looks up the packages from the current folder.
+
+....................................................................................
+				Node Packages
+
+How to install node packages which was distributed by others?
+
+npm install [<package-name>]
+
+You can find out the packages from npm registry server
+
+npm install | i  lodash --options
+
+npm i lodash 
+
+No options are given by default "--save"
+
+Options:
+
+ --save
+     for production + dev
+ --save-dev
+     -for only for dev 
+ --production
+    -for only production
+  -g
+    -for tool purpose -dev
+
+
+Application mode
+
+1.dev
+2.test
+3.prod
+
+dev : any dependency required for development only
+  --save-dev
+test : 
+   any dependency required for development only - test
+   --save-dev
+prod:
+  dependency used in dev and production... 
+  --save
+"dependencies": {
+    "lodash": "^4.17.21"
+  }
+..................................................................................
+			 Test /Dev Only Dependency
+.................................................................................
+
+Libs required for dev and test
+tools
+   -compilers,webservers
+   -testing libs and framworks 
+
+eg:
+  mocha - test runner is used for running test case
+  chai.js -test assertion lib used for writing test cases
+  jest -  test runner is used for running test cases
+
+"devDependencies": {
+    "chai": "^4.3.6"
+  }
+....................................................................................
+				
+....................................................................................
+	  How to install only production dependencies during build process
+....................................................................................
+if you want to use app in production mode, you have exclude the dependencies.
+
+npm i /npm install - install dev and production packages...
+ --->it scans package.json file which install everything(dev + prod)
+
+npm install --production
+  it scans package.json which install only from  production dependencies
+.....................................................................................
+.....................................................................................
+....................................................................................
+			How to remove /uninstall package
+
+npm uninstall mocha --save-dev
+,,,,,,,,,,,,,........................................................................
+			Global Package
+..................................................................................
+         		
+
+Global package is installed not inside project, installed globally.
+Global packages are generally tools to create projects,webservers,test runtime like so.
+npm install nodemon -g
+npm install mocha -g
+npm install create-react-app -g
+etc...
+....................................................................................
+			 scripts
+....................................................................................
+ if you want to automat the js app workflows, scripts section is used.
+
+scripts has ,script command and task to be executed.
+
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+
+test - is command
+"echo \"Error: no test specified\" && exit 1" - task to be executed
+
+in npm we have many built in commands.
+eg
+ start
+ stop
+ publish
+ test
+ pack
+ postinstall
+ preinstall
+etc..
+https://docs.npmjs.com/cli/v8/using-npm/scripts#npm-rebuild
+
+Use case :
+ We can run node apps using scripts
+ we can run webservers using scripts
+ we can initalize the test env using scripts
+ we can start containers using scripts
+ etc...
+
+how to execute scripts commands?
+
+npm commandName
+eg
+npm start
+npm test
+npm pack
+etc..
+
+npm allows even custom commands
+
+subu:"task"
+build:""
+deploy:""
+compile:""
+
+if you want to custom script command?
+
+npm run commandName
+npm run subu
+npm run build
+
+
+
+
+
+
+
+
+
+
+
+
