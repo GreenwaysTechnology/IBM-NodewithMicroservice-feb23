@@ -1,0 +1,184 @@
+		How to build NonBlocking Web Applications 
+
+
+Node.js is reference implementation of "c10K" Problem.
+Node.js has removed the concept of "Request Per Thread Model"
+Node.js Handls more concurrent requests using "single Event Loop thread".
+
+Node.js Provides a module called "http".
+
+Node Js Provides HTTP Server,HttpApplication , is nonblocking.
+
+Unlike traditional webservers,node uses single event thread to handle concurrent requests.
+
+Http Module:
+The HTTP interfaces in Node.js are designed to support many features of the protocol which have been traditionally difficult to use. In particular, large, possibly chunk-encoded, messages. The interface is careful to never buffer entire requests or responses, so the user is able to stream data.
+
+HTTP modules objects:
+
+1.Server
+  Server object is used to implement http servers/web containers
+2.ServerResponse
+  Object is used to send data 
+3.ClientRequest
+   Request object is used to handle http client requests
+4.IncommingMessage
+   Represents message payloads.
+
+
+In Node Web:
+
+1.You create web containers
+2.You create web app
+3.You deploy it.
+
+const http = require('http')
+
+
+const server = http.createServer((req, res) => {
+    //request and response processing logic
+    res.end('Hello,Node!')
+})
+
+//start the server 
+server.listen(3000, () => {
+    console.log('HTTP server is running')
+})
+...................................................................................
+....................................................................................
+			 How to enable hot reloading feature
+
+When ever the program gets changed we need to monitor the program and update accordingly.
+
+nodemon - node monitor package.
+npm install -g nodemon
+
+nodemon src/index.js
+nodemon] 2.0.20
+[nodemon] to restart at any time, enter `rs`
+[nodemon] watching path(s): *.*
+[nodemon] watching extensions: js,mjs,json
+[nodemon] starting `node src/index.js`
+HTTP server starts
+[nodemon] restarting due to changes...
+[nodemon] starting `node src/index.js`
+HTTP server starts
+....................................................................................
+				Use case
+ 		REST API which sends data as json.
+...................................................................................
+
+const todos = require('../mock-data/todos')
+
+class TodoService {
+    constructor() { }
+    findAll() {
+        return todos
+    }
+}
+module.exports = new TodoService()
+
+const http = require('http')
+const { findAll } = require('./services/todo.service')
+
+
+const server = http.createServer((req, res) => {
+    //return todos as response(json)
+    const todosJson = JSON.stringify(findAll())
+    //set header
+    res.writeHead(200, {
+        'Content-Type': 'application/json'
+    })
+    res.end(todosJson)
+
+})
+
+//start the server 
+server.listen(3000, () => {
+    console.log('HTTP server is running')
+})
+..................................................................................
+Callback based Programming:
+
+const http = require('http')
+const { findAll } = require('./services/todo.service')
+
+
+const server = http.createServer((req, res) => {
+    //callback based
+    findAll(todos => {
+        //set header
+        const todosJson = JSON.stringify(todos)
+        res.writeHead(200, {
+            'Content-Type': 'application/json'
+        })
+        res.end(todosJson)
+    })
+
+})
+
+//start the server 
+server.listen(3000, () => {
+    console.log('HTTP server is running')
+})
+
+Promise with then and catch:
+.............................
+
+const http = require('http')
+const { findAll } = require('./services/todo.service')
+const server = http.createServer((req, res) => {
+    //Promise based
+    findAll()
+        .then(todos => {
+            //set header
+            const todosJson = JSON.stringify(todos)
+            res.writeHead(200, {
+                'Content-Type': 'application/json'
+            })
+            res.end(todosJson)
+        })
+        .catch(err => {
+            res.writeHead(200, {
+                'Content-Type': 'application/json'
+            })
+            res.end({ message: 'Something went wrong' + err })
+        })
+
+})
+
+//start the server 
+server.listen(3000, () => {
+    console.log('HTTP server is running')
+})
+............................................................
+
+Promise with async and await:
+.............................
+const http = require('http')
+const { findAll } = require('./services/todo.service')
+const server = http.createServer(async (req, res) => {
+    //Promise with async and wait based
+
+    try {
+        const todos = await findAll()
+        const todosJson = JSON.stringify(todos)
+        res.writeHead(200, {
+            'Content-Type': 'application/json'
+        })
+        res.end(todosJson)
+    }
+    catch (err) {
+        res.writeHead(200, {
+            'Content-Type': 'application/json'
+        })
+        res.end({ message: 'Something went wrong' + err })
+    }
+
+})
+
+//start the server 
+server.listen(3000, () => {
+    console.log('HTTP server is running')
+})
+
