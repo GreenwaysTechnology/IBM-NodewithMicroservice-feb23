@@ -1,0 +1,403 @@
+				MicroServices
+.....................................................................................
+How to build distributed apps?
+1.Monolithic
+    Old way of building ,testing,deploying apps
+2.Microservices
+
+What is MicroService?
+Microservices - also known as the microservice architecture - is an architectural style that structures an application as a collection of services that are
+
+Highly maintainable and testable
+Loosely coupled
+Independently deployable
+Organized around business capabilities
+Owned by a small team
+
+The microservice architecture enables the rapid, frequent and reliable delivery of large, complex applications. It also enables an organization to evolve its technology stack.
+
+Microservices are based on Design patterns:
+
+1.Service Design pattern
+2.Data Management Pattern
+3.Deployment Pattern
+4.Cross Cutting Patterns
+5.Communication style patterns
+6.Reliablity Pattern
+7.Security Pattern
+8.Observablity Pattern
+.....................................................................................
+.....................................................................................				Micro service Implemenation
+...................................................................................
+
+Micro services can be implemeneted in any language 
+
+Java :
+
+1.Spring Cloud
+2.Vertx
+3.Quarkus
+
+Javascript (Node.js):
+1.Moleculer
+2.Loopback
+3.Nest
+...................................................................................
+				Moleculer
+.................................................................................
+
+
+What is Moleculer?
+  Moleculer is open source Micro service framework.
+
+Features of Moleculer:
+
+1.Promise-based solution (async/await compatible)
+2.request-reply concept
+3.support event driven architecture with balancing
+4.built-in service registry & dynamic service discovery
+5.load balanced requests & events (round-robin, random, cpu-usage, latency, sharding)
+6.many fault tolerance features (Circuit Breaker, Bulkhead, Retry, Timeout, Fallback)
+plugin/middleware system
+7.support versioned services
+8.support Streams
+9.service mixins
+10.built-in caching solution (Memory, MemoryLRU, Redis)
+11.pluggable loggers (Console, File, Pino, Bunyan, Winston, Debug, Datadog, Log4js)
+12.pluggable transporters (TCP, NATS, MQTT, Redis, NATS Streaming, Kafka, AMQP 0.9, AMQP 1.0)
+13.pluggable serializers (JSON, Avro, MsgPack, Protocol Buffer, Thrift)
+14.pluggable parameter validator
+15.multiple services on a node/server
+16.master-less architecture, all nodes are equal
+17.parameter validation with fastest-validator
+18.built-in metrics feature with reporters (Console, CSV, Datadog, Event, Prometheus, StatsD)
+19.built-in tracing feature with exporters (Console, Datadog, Event, Jaeger, Zipkin)
+20.official API gateway, Database access and many other modules…
+
+core concepts:
+1.Service
+ A service is a simple JavaScript module containing some part of a complex application. 
+ A service represents a biz logic in your application.
+
+2.Service Broker : == Spring Container
+
+ Service Broker is the heart of Moleculer.
+
+It is responsible for management and communication between services (local and remote). 
+
+3.node :
+ A node is a simple OS process running on a local or external network.
+ A single instance of a node can host one or many services.
+ node js platform - v8+libvu..
+
+Each node must have an instance of Service Broker.
+
+"Service Broker is one single Node instance - Node runtime"
+
+4.Transporter
+	Transporter is a communication bus that services use to exchange messages. 
+ It transfers events, requests and responses.
+
+5.Gateway
+     API Gateway exposes Moleculer services to end-users.
+ The gateway is a regular Moleculer service running a (HTTP, WebSockets, etc.) server. It handles the incoming requests, maps them into service calls, and then returns appropriate responses.
+.....................................................................................
+....................................................................................
+				Project Setup
+....................................................................................
+
+1.normal node project 
+2.using moleculer cli
+
+Project creation:
+.................
+>mkdir microserviceapp
+
+>cd microserviceapp
+
+>npm init --yes
+
+{
+  "name": "microserviceapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+
+>mkdir services
+>npm install moleculer --save
+
+
+How to create service broker,declare service and start?
+/**
+ * Get the Service Broker object 
+ * Declare Service
+ * Start Service/deploy the service on Moleculer runtime-service Broker
+ */
+const { ServiceBroker } = require('moleculer')
+//create instance of service broker
+const broker = new ServiceBroker()
+
+//declare service
+broker.createService({
+    name: 'hello',
+    actions: {
+        sayHello() {
+            return 'Hello,MicroService'
+        }
+    }
+})
+//deploy the service/start service broker
+function main() {
+    //start the service broker , start method returns promise
+    broker.start()
+        .then(() => console.log('broker is ready'))
+        .catch(err => console.log('broker failed to start'))
+}
+main()
+
+node services/helloworld.service.js
+node services/helloworld.service.js
+[2022-11-09T10:17:39.429Z] INFO  laptop-r2tggfdl-7732/BROKER: Moleculer v0.14.25 is starting...
+[2022-11-09T10:17:39.431Z] INFO  laptop-r2tggfdl-7732/BROKER: Namespace: <not defined>
+[2022-11-09T10:17:39.431Z] INFO  laptop-r2tggfdl-7732/BROKER: Node ID: laptop-r2tggfdl-7732
+[2022-11-09T10:17:39.432Z] INFO  laptop-r2tggfdl-7732/REGISTRY: Strategy: RoundRobinStrategy
+[2022-11-09T10:17:39.434Z] INFO  laptop-r2tggfdl-7732/REGISTRY: Discoverer: LocalDiscoverer
+[2022-11-09T10:17:39.440Z] INFO  laptop-r2tggfdl-7732/BROKER: Serializer: JSONSerializer
+[2022-11-09T10:17:39.450Z] INFO  laptop-r2tggfdl-7732/BROKER: Validator: FastestValidator
+[2022-11-09T10:17:39.452Z] INFO  laptop-r2tggfdl-7732/BROKER: Registered 13 middleware(s).
+[2022-11-09T10:17:39.468Z] INFO  laptop-r2tggfdl-7732/REGISTRY: '$node' service is registered.
+[2022-11-09T10:17:39.469Z] INFO  laptop-r2tggfdl-7732/REGISTRY: 'hello' service is registered.
+[2022-11-09T10:17:39.470Z] INFO  laptop-r2tggfdl-7732/$NODE: Service '$node' started.
+[2022-11-09T10:17:39.470Z] INFO  laptop-r2tggfdl-7732/HELLO: Service 'hello' started.
+[2022-11-09T10:17:39.471Z] INFO  laptop-r2tggfdl-7732/BROKER: ✔ ServiceBroker with 2 service(s) started successfully in 8ms.
+broker is ready
+[2022-11-09T10:17:39.574Z] INFO  laptop-r2tggfdl-7732/$NODE: Service '$node' stopped.
+[2022-11-09T10:17:39.575Z] INFO  laptop-r2tggfdl-7732/HELLO: Service 'hello' stopped.
+[2022-11-09T10:17:39.577Z] INFO  laptop-r2tggfdl-7732/BROKER: ServiceBroker is stopped. Good bye.
+.....................................................................................
+
+How to invoke/call Service methods?
+
+There are many ways
+
+1.By using broker.start method
+2.By using  REPL cli
+3.By using another service => Service to Service calls
+
+/**
+ * Get the Service Broker object 
+ * Declare Service
+ * Start Service/deploy the service on Moleculer runtime-service Broker
+ */
+const { ServiceBroker } = require('moleculer')
+//create instance of service broker
+const broker = new ServiceBroker()
+
+//declare service
+broker.createService({
+    name: 'hello',
+    actions: {
+        sayHello() {
+            return 'Hello,MicroService'
+        }
+    }
+})
+//deploy the service/start service broker
+function main() {
+    //start the service broker , start method returns promise
+    broker.start()
+        .then(() => {
+            console.log('broker is ready')
+            //service calls 
+            broker.call('hello.sayHello').then(res => {
+                console.log(res)
+            }).catch(err => {
+                console.log('service call failed', err)
+            })
+        })
+        .catch(err => console.log('broker failed to start'))
+}
+main()
+
+How to optimize the main code using async...await?
+/**
+ * Get the Service Broker object 
+ * Declare Service
+ * Start Service/deploy the service on Moleculer runtime-service Broker
+ */
+const { ServiceBroker } = require('moleculer')
+//create instance of service broker
+const broker = new ServiceBroker()
+
+//declare service
+broker.createService({
+    name: 'hello',
+    actions: {
+        sayHello() {
+            return 'Hello,MicroService'
+        }
+    }
+})
+//deploy the service/start service broker
+function main_() {
+    //start the service broker , start method returns promise
+    broker.start()
+        .then(() => {
+            console.log('broker is ready')
+            //service calls 
+            broker.call('hello.sayHello').then(res => {
+                console.log(res)
+            }).catch(err => {
+                console.log('service call failed', err)
+            })
+        })
+        .catch(err => console.log('broker failed to start'))
+}
+async function main() {
+    try {
+        await broker.start()
+        const res = await broker.call('hello.sayHello')
+        console.log(res)
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+main()
+.....................................................................................
+Multi services on a single broker and multi methods on single service
+
+const { ServiceBroker } = require('moleculer')
+//create instance of service broker
+const broker = new ServiceBroker()
+
+//declare service
+broker.createService({
+    name: 'hello',
+    actions: {
+        sayHello() {
+            return 'Hello,MicroService'
+        }
+    }
+})
+broker.createService({
+    name: 'hai',
+    actions: {
+        sayHai() {
+            return 'Hai,MicroService'
+        }
+    }
+})
+async function main() {
+    try {
+        await broker.start()
+        const hello = await broker.call('hello.sayHello')
+        console.log(hello)
+        const hai = await broker.call('hai.sayHai')
+        console.log(hai)
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+main()
+
+Multi methods:
+.............
+const { ServiceBroker } = require('moleculer')
+//create instance of service broker
+const broker = new ServiceBroker()
+
+//declare service
+broker.createService({
+    name: 'greeter',
+    actions: {
+        sayHello() {
+            return 'Hello,MicroService'
+        },
+        sayHai(){
+            return 'Hai,Micro Service'
+        },
+        sayGreet(){
+            return 'Greet,Mico Service'
+        }
+    }
+})
+
+async function main() {
+    try {
+        await broker.start()
+        const hello = await broker.call('greeter.sayHello')
+        console.log(hello)
+        const hai = await broker.call('greeter.sayHai')
+        console.log(hai)
+        const greet = await broker.call('greeter.sayGreet')
+        console.log(greet)
+
+    
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+main()
+.....................................................................................
+			    Service api parameters
+....................................................................................
+
+How to pass params to Service methods? How to read args from the service Method?
+
+Parameters are stored inside special object called "Context"
+
+Context Object:
+
+1.Similar to Broker Object
+2.It has all capacity of Broker object
+3.Context object is used inside service definitions , where ever you require broker
+  Object reference.
+
+context object already created, and its refernce is avaiable inside "Service method" as args.
+
+reading parameters
+
+1.context.params 
+  params are literal object what ever parameter we pass, it will inside this
+
+context.params.variable
+
+const { ServiceBroker } = require('moleculer')
+const broker = new ServiceBroker()
+
+//declare service
+broker.createService({
+    name: 'hello',
+    actions: {
+        //args
+        sayHello(ctx) {
+            console.log(ctx)
+            const { message } = ctx.params
+            //return `${ctx.params.message},MicroService`
+            return `${message},MicroService`
+        }
+    }
+})
+
+async function main() {
+    try {
+        await broker.start()
+        const hello = await broker.call('hello.sayHello', { message: 'Hello' })
+        console.log(hello)
+
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+main()
