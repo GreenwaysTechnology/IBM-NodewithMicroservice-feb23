@@ -758,3 +758,544 @@ It list all information related to your broker,os...
 .....................................................................................
 			Remote Services and communication
 .....................................................................................
+.....................................................................................
+			   Router configurations
+..................................................................................
+
+const { ServiceBroker } = require('moleculer')
+const ApiGateWay = require('moleculer-web')
+
+const broker = new ServiceBroker({
+    transporter: 'TCP',
+    serializer: "JSON" // not necessary to set, because it is the default
+});
+
+// /GateWayService
+broker.createService({
+    name: 'ApiGateWay',
+    mixins: [ApiGateWay],
+    //override ApiGateWayService properties
+    settings: {
+        routes: [{
+            path: '/api'
+        }, {
+            path: '/admin'
+        }]
+    }
+})
+
+broker.createService({
+    name: 'greeter',
+    actions: {
+        sayHello() {
+            return 'Hello!';
+        }
+    }
+})
+
+broker.createService({
+    name: 'admin',
+    actions: {
+        getAdmin() {
+            return 'Admin!';
+        }
+    }
+})
+
+async function main() {
+    await broker.start();
+}
+main();
+....................................................................................
+    		How to restrict service method/actions access outside
+				whiteList - configuration
+...................................................................................
+
+const { ServiceBroker } = require('moleculer')
+const ApiGateWay = require('moleculer-web')
+
+const broker = new ServiceBroker({
+    transporter: 'TCP',
+    serializer: "JSON" // not necessary to set, because it is the default
+});
+
+// /GateWayService
+broker.createService({
+    name: 'ApiGateWay',
+    mixins: [ApiGateWay],
+    //override ApiGateWayService properties
+    settings: {
+        routes: [{
+            path: '/api',
+            whitelist: [
+                "greeter.sayHello",
+                "greeter.sayHai"
+            ]
+        }, {
+            path: '/admin'
+
+        }]
+    }
+})
+
+broker.createService({
+    name: 'greeter',
+    actions: {
+        sayHello() {
+            return 'Hello!';
+        },
+        sayHai() {
+            return 'Hai!';
+        },
+        sayGreet() {
+            return 'Greet!';
+        }
+    }
+
+})
+
+broker.createService({
+    name: 'admin',
+    actions: {
+        getAdmin() {
+            return 'Admin!';
+        }
+    }
+})
+
+async function main() {
+    await broker.start();
+}
+main();
+....................................................................................
+
+			URL Mapping in moleculer
+..................................................................................
+
+http://localhost:3000/api/serviceName/actionName
+
+  This is not good way to map urls , which more difficult to remember, it is not user friendly
+it is not even secure,the reason, we expose the back end service to end users.
+
+Aliases:
+........
+  You can use aliases(dummyname/fakename)-Virtual path, instead of action name.
+
+ settings: {
+        routes: [
+            {
+                path: "/api",
+                aliases: { 
+                    "hello" : "greeter.hello",
+                    "users" :  "users.list"
+                }             
+            }
+        ]
+
+http://localhost:3000/api/hello
+http://localhost:3000/api/users
+
+const { ServiceBroker } = require('moleculer')
+const ApiGateWay = require('moleculer-web')
+
+const broker = new ServiceBroker({
+    transporter: 'TCP',
+    serializer: "JSON" // not necessary to set, because it is the default
+});
+
+// /GateWayService
+broker.createService({
+    name: 'ApiGateWay',
+    mixins: [ApiGateWay],
+    //override ApiGateWayService properties
+    settings: {
+        routes: [{
+            path: '/api',
+            aliases: {
+                "hello": "greeter.sayHello",
+                "hai": "greeter.sayHai",
+                "greet": "greeter.sayGreet"
+            }
+
+        }, {
+            path: '/admin'
+
+        }]
+    }
+})
+
+broker.createService({
+    name: 'greeter',
+    actions: {
+        sayHello() {
+            return 'Hello!';
+        },
+        sayHai() {
+            return 'Hai!';
+        },
+        sayGreet() {
+            return 'Greet!';
+        }
+    }
+
+})
+
+
+
+async function main() {
+    await broker.start();
+}
+main();
+.....................................................................................			HTTP Verbs Mapping - GET,POST,PUT,DELETE,PATCH
+....................................................................................
+
+aliases: {
+   "GET users": "user.list",  //GET list is default method
+   "GET users/:id": "user.get", //users/1 users/2 users/3
+   "POST users": "user.create",
+   "PUT users/:id": "user.update",
+   "DELETE users/:id": "user.remove"
+}
+
+const { ServiceBroker } = require("moleculer");
+const ApiGateWayService = require("moleculer-web");
+const PRODUCTS = require('../mock-data/products')
+
+const broker = new ServiceBroker();
+
+//CURD service : 
+
+broker.createService({
+    name: 'products',
+    actions: {
+        //GET ALL products
+        list: {
+            handler(ctx) {
+                return PRODUCTS;
+            }
+        },
+        //GET product by id
+        get: {
+            handler(ctx) {
+                console.log(ctx.params)
+                return PRODUCTS.filter(product => product.id == ctx.params.id)
+            }
+        },
+        //save
+        create(ctx) {
+            console.log(ctx.params)
+            return 'Product Created'
+        },
+        //update
+        update(ctx) {
+            return 'Product updated'
+        },
+        //delete
+        remove(ctx) {
+            return 'Product removed'
+        }
+    }
+})
+
+
+broker.createService({
+    name: 'APIGateWay',
+    mixins: [ApiGateWayService],
+    settings: {
+        routes: [{
+            path: '/api',
+            aliases: {
+                "GET products": "products.list",  //GET list is default method
+                "GET products/:id": "products.get", //users/1 users/2 users/3
+                "POST products": "products.create",
+                "PUT products/:id": "products.update",
+                "DELETE products/:id": "products.remove"
+            }
+        }]
+    }
+})
+
+
+async function init() {
+    try {
+        await broker.start();
+    }
+    catch (e) {
+        log(e);
+    }
+}
+init();
+.....................................................................................
+SHORT Cut 
+
+
+Without short cut
+  aliases: {
+                "GET users": "user.list",  //GET list is default method
+                "GET users/:id": "user.get", //users/1 users/2 users/3
+                "POST users": "user.create",
+                "PUT users/:id": "user.update",
+                "DELETE users/:id": "user.remove"
+            }
+With Short cut
+
+it will map actions automatically but there is rule , method names should be like below
+ aliases: { 
+   "REST users" : "users"
+ }
+
+method names:
+ list
+ get
+ create
+ update
+ remove
+
+
+const { ServiceBroker } = require("moleculer");
+const ApiGateWayService = require("moleculer-web");
+const PRODUCTS = require('../mock-data/products')
+
+const broker = new ServiceBroker();
+
+//CURD service : 
+
+broker.createService({
+    name: 'products',
+    actions: {
+        //GET ALL products
+        list: {
+            handler(ctx) {
+                return PRODUCTS;
+            }
+        },
+        //GET product by id
+        get: {
+            handler(ctx) {
+                console.log(ctx.params)
+                return PRODUCTS.filter(product => product.id == ctx.params.id)
+            }
+        },
+        //save
+        create(ctx) {
+            console.log(ctx.params)
+            return 'Product Created'
+        },
+        //update
+        update(ctx) {
+            return 'Product updated'
+        },
+        //delete
+        remove(ctx) {
+            return 'Product removed'
+        }
+    }
+})
+
+
+broker.createService({
+    name: 'APIGateWay',
+    mixins: [ApiGateWayService],
+    settings: {
+        routes: [{
+            path: '/api',
+            aliases: {
+                // "GET products": "products.list",  //GET list is default method
+                // "GET products/:id": "products.get", //users/1 users/2 users/3
+                // "POST products": "products.create",
+                // "PUT products/:id": "products.update",
+                // "DELETE products/:id": "products.remove"
+                "REST products" : "products"
+            }
+        }]
+    }
+})
+
+
+async function init() {
+    try {
+        await broker.start();
+    }
+    catch (e) {
+        log(e);
+    }
+}
+init();
+Extra methods:
+
+
+
+broker.createService({
+    name: 'ApiGateWayService',
+    mixins: [ApiGateWayService],
+    settings: {
+        routes: [
+            {
+                path: "/api",
+                aliases: {
+                    "REST users": "users",
+                    "GET myapi"(req, res) {
+                        // res.end("Hello This is my api")
+                        res.end(JSON.stringify(USERS));
+                    }
+                }
+            }
+        ]
+    }
+})
+
+async function init() {
+    try {
+        await broker.start();
+    }
+    catch (e) {
+        log(e);
+    }
+}
+.....................................................................................
+	....................................................................................
+		  	Convert any back end service into rest api
+....................................................................................
+			Auto aliases: without mapping rest api 
+.....................................................................................
+Actions can be converted into rest api.
+
+      list:{
+	  // /api/users/
+	   rest : "GET /"       
+	   handler(ctx){
+
+	   }
+        }
+
+      get:{
+	  // /api/users/
+	   rest : "GET /:id"       
+	   handler(ctx){
+
+	   }
+        }
+
+     save:{
+	  // /api/users/
+	   rest : "POST /"       
+	   handler(ctx){
+
+	   }
+        }			
+
+
+
+const { ServiceBroker } = require("moleculer");
+const ApiGateWayService = require("moleculer-web");
+const PRODUCTS = require('../mock-data/products')
+
+const broker = new ServiceBroker();
+
+broker.createService({
+    name: 'products',
+    actions: {
+        //GET ALL products
+        list: {
+            rest: "GET /",
+            handler(ctx) {
+                return PRODUCTS;
+            }
+        },
+        //GET product by id
+        get: {
+            rest: "GET /:id",
+            handler(ctx) {
+                console.log(ctx.params)
+                return PRODUCTS.filter(product => product.id == ctx.params.id)
+            }
+        },
+        //save
+        create: {
+            rest: "POST /",
+            handler(ctx) {
+                console.log(ctx.params)
+                return 'Product Created'
+            }
+        },
+        //update
+        update: {
+            rest: "PUT /:id",
+            handler(ctx) {
+                console.log(ctx.params)
+                return 'Product update'
+            }
+        },
+        //delete
+        remove: {
+            rest: "DELETE /:id",
+            handler(ctx) {
+                console.log(ctx.params)
+                return 'Product update'
+            }
+        }
+    }
+})
+
+
+broker.createService({
+    name: 'APIGateWay',
+    mixins: [ApiGateWayService],
+    settings: {
+        routes: [{
+            path: '/api',
+            aliases: {
+            },
+            autoAliases: true
+        }]
+    }
+})
+
+async function main() {
+    try {
+        await broker.start();
+    }
+    catch (e) {
+        log(e);
+    }
+}
+main()
+Advanced Configurations
+
+port,host,http2,https
+.....................
+settings: {
+		// Exposed port
+		port: 4000,
+
+		// Exposed IP
+		ip: "0.0.0.0",
+
+		// HTTPS server with certificate
+		https: {
+			key: fs.readFileSync(path.join(__dirname, "../ssl/key.pem")),
+			cert: fs.readFileSync(path.join(__dirname, "../ssl/cert.pem"))
+		},
+
+		//http2: true,
+
+		// Global CORS settings
+		cors: {
+			origin: "*",
+			methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
+			allowedHeaders: "*",
+			//exposedHeaders: "*",
+			credentials: true,
+			maxAge: null
+		},
+
+		// Rate limiter
+		rateLimit: {
+			window: 10 * 1000,
+			limit: 10,
+			headers: true
+		},
+
+		etag: true
+}
+....................................................................................
