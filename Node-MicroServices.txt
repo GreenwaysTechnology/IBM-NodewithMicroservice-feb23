@@ -1194,3 +1194,631 @@ const broker = new ServiceBroker({
 })
 .....................................................................................
 .....................................................................................
+.....................................................................................
+.....................................................................................
+
+				Methods Types
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Service Methods:
+
+1.public methods
+    methods are accssiable outside 
+2.private methods
+  methods are not accssible outside
+  methods are used to isloate complex logic from public methods.
+
+
+public methods:
+ any thing if you write inside actions are called public methods.
+
+actions: { 
+   
+  //public methods
+  sayHello:{
+     handler(ctx){
+
+      }
+  }
+
+}
+
+private methods:
+
+createService({
+
+ //public methods
+ actions: {
+
+ },
+
+ //private methods
+ methods: {
+
+
+ }
+
+})
+
+
+const { ServiceBroker } = require('moleculer')
+const broker = new ServiceBroker()
+
+//declare service
+broker.createService({
+    name: 'math',
+    //public methods
+    actions: {
+        //args
+        add: {
+            handler(ctx) {
+                return this.addNos(ctx.params.a, ctx.params.b)
+            }
+        }
+    },
+    methods: {
+        addNos(a, b) {
+            return a + b
+        }
+    }
+})
+
+async function main() {
+    try {
+        await broker.start()
+        const res = await broker.call('math.add', { a: 1, b: 2 })
+        console.log(res)
+
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+main()
+.....................................................................................
+...................................................................................
+			  Service Life Cycle methods
+...................................................................................
+
+Service life cycle methods are called by broker in various stages of services
+
+Service life cycle methods are very usefull for doing some initalization, re initalizations tasks.
+
+1. created() {
+        // Fired when the service instance created (with `broker.loadService` or `broker.createService`)
+    },
+
+    merged() {
+        // Fired after the service schemas merged and before the service instance created
+    },
+    
+    async started() {
+        // Fired when broker starts this service (in `broker.start()`)
+    }
+
+    async stopped() {
+        // Fired when broker stops this service (in `broker.stop()`)
+    }
+
+
+
+eg:
+const { ServiceBroker } = require('moleculer')
+
+const broker = new ServiceBroker();
+
+broker.createService({
+    name: 'math',
+    //public methods
+    actions: {
+        add: {
+            params: {
+                a: { type: "number", positive: true, integer: true },
+                b: { type: "number", positive: true, integer: true }
+            },
+            handler(ctx) {
+                //call private method
+                return this.add(ctx)
+            }
+        },
+        multiply: {
+            params: {
+                a: { type: "number", positive: true, integer: true },
+                b: { type: "number", positive: true, integer: true }
+            },
+            handler(ctx) {
+                //call private method
+                return this.multiply(ctx)
+            }
+        }
+    },
+    //private methods
+    methods: {
+        add(ctx) {
+            return ctx.params.a + ctx.params.b
+        },
+        multiply(ctx) {
+            return ctx.params.a * ctx.params.b
+        }
+    },
+    //life cycle methods
+    created() {
+        console.log('service is created')
+    },
+    merged() {
+        console.log('service is merged')
+    },
+    async started() {
+        console.log('service is started ')
+    },
+    async stoped() {
+        console.log('service is stopped')
+    }
+})
+async function main() {
+    try {
+        await broker.start()
+        console.log('Broker is Ready!')
+        //Use Repl
+        await broker.repl()
+
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+main()
+.....................................................................................
+			   Service dependency -has a 
+....................................................................................
+const { ServiceBroker } = require("moleculer")
+
+const broker = new ServiceBroker();
+
+broker.createService({
+    name: 'comments',
+    actions: {
+        findAll() {
+            return 'Comments'
+        }
+    },
+    //Dependency
+    dependencies: [
+        "posts"
+    ],
+    //Life cycle methods
+    created() {
+        console.log('Comments Service Created')
+    },
+    merged() {
+        // Fired after the service schemas merged and before the service instance created
+        console.log('Comments Service merged')
+    },
+
+    async started() {
+        // Fired when broker starts this service (in `broker.start()`)
+        console.log('Comments Service started')
+    },
+    async stopped() {
+        // Fired when broker stops this service (in `broker.stop()`)
+        console.log('Comments Service stoped')
+    },
+
+})
+
+broker.createService({
+    name: 'posts',
+    actions: {
+        findAll() {
+            return [{ id: 1, name: 'Microservices' }]
+        }
+    },
+    //Life cycle methods
+    created() {
+        console.log('Posts Service Created')
+    },
+    merged() {
+        // Fired after the service schemas merged and before the service instance created
+        console.log('Posts Service merged')
+    },
+
+    async started() {
+        // Fired when broker starts this service (in `broker.start()`)
+        console.log('Posts Service started')
+    },
+    async stopped() {
+        // Fired when broker stops this service (in `broker.stop()`)
+        console.log('Posts Service stoped')
+    }
+})
+
+
+async function main() {
+
+    try {
+        await broker.start()
+        await broker.repl()
+
+    } catch (error) {
+        console.log(error)
+    }
+}
+main();
+....................................................................................
+			 Service Code Reuse- Service Inheritance
+....................................................................................
+
+A Service has many options, those options may be repeated in many other services,
+like common settings.
+
+We can isloate common features / options into a separate service, we can reuse across multiple services -  Inheritance.
+
+How to implement inheritance in moleculer?
+
+Javascript can support only single inheritance, only one parent allowed for a child.
+
+Java like languages support interfaces for multi parent patterns, javascript has no such facility.
+
+Javascript has a design pattern and implementation ,called "mixin", through mixin we can inherit many super objects.
+
+Moleculer has mixin property
+
+Use case:
+1.if you write any REST Controller.
+2.if you write database operations inside your service.
+etc...
+
+const { ServiceBroker } = require('moleculer')
+const broker = new ServiceBroker();
+
+//parent Services
+const hello = {
+    name: 'hello',
+    actions: {
+        sayHello() {
+            return 'Hello,From Parent';
+        }
+    }
+}
+const hai = {
+    name: 'hai',
+    actions: {
+        sayHai() {
+            return 'Hai, From Parent'
+        }
+    }
+}
+//Child Service
+broker.createService({
+    name: 'greeter',
+    mixins: [hello, hai]
+})
+
+async function main() {
+    try {
+        await broker.start()
+        broker.repl();
+    }
+    catch (err) {
+        console.log(err);
+    }
+
+}
+main();
+
+mol $ call greeter.sayHai
+>> Call 'greeter.sayHai' with params: {} with meta: { '$repl': true }
+>> Execution time:4ms
+>> Response:
+'Hai, From Parent'
+mol $ call greeter.sayHello
+>> Call 'greeter.sayHello' with params: {} with meta: { '$repl': true }
+>> Execution time:1ms
+>> Response:
+'Hello,From Parent'
+.....................................................................................
+		Defining Service Properties and How to override them
+
+Service has 
+
+1.methods called actions
+2.properties which are defined inside "settings"
+3.parent settings and actions can be overriden inside child service.
+
+const { ServiceBroker } = require('moleculer')
+const broker = new ServiceBroker();
+
+//simulating some webserver settings
+
+const webServer = {
+    name: 'webserver',
+    //parent properties
+    settings: {
+        port: 8080,
+        host:'ibm.com'
+    }
+}
+
+//parent Services
+const hello = {
+    name: 'hello',
+    actions: {
+        sayHello() {
+            return 'Hello,From Parent';
+        }
+    }
+}
+const hai = {
+    name: 'hai',
+    actions: {
+        sayHai() {
+            return 'Hai, From Parent'
+        }
+    }
+}
+//Child Service
+broker.createService({
+    name: 'greeter',
+    mixins: [hello, hai, webServer],
+    //override parent properties
+    settings: {
+        port: 3000
+    },
+    actions: {
+        greet: {
+            handler(ctx) {
+                return `WebServer Port is ${this.settings.port} Host ${this.settings.host}`
+            }
+        },
+        sayHello(){
+            return 'Child Overriding Hello'
+        }
+    }
+})
+
+
+
+async function main() {
+    try {
+        await broker.start()
+        broker.repl();
+    }
+    catch (err) {
+        console.log(err);
+    }
+
+}
+main();
+.....................................................................................
+...................................................................................
+				Types of Services
+
+Moleculer Provides two types of service
+
+1.Custom Services
+   The services are created with broker object
+2.Built services
+  The services are provided by Broker
+ $node
+   Used for administration
+
+
+How to list all services using $node
+
+ call $node.services
+>> Call '$node.services' with params: {} with meta: { '$repl': true } with options: {}
+>> Execution time:1ms
+>> Response:
+[
+  {
+    name: '$node',
+    version: undefined,
+    fullName: '$node',
+    settings: {},
+    metadata: {},
+    local: true,
+    available: true,
+    nodes: [ 'laptop-r2tggfdl-17828' ]
+  },
+  {
+    name: 'greeter',
+    version: undefined,
+    fullName: 'greeter',
+    settings: { port: 3000, host: 'ibm.com' },
+    metadata: {},
+    local: true,
+    available: true,
+    nodes: [ 'laptop-r2tggfdl-17828' ]
+  }
+]
+
+$ call $node.list
+>> Call '$node.list' with params: {} with meta: { '$repl': true } with options: {}
+>> Execution time:1ms
+>> Response:
+[
+  {
+    id: 'laptop-r2tggfdl-17828',
+    instanceID: 'c7fd8078-2bf2-42ee-88f6-1fd20184eb3c',
+    available: true,
+    local: true,
+    lastHeartbeatTime: 0,
+    config: {},
+    client: { type: 'nodejs', version: '0.14.21', langVersion: 'v16.15.0' },
+    metadata: {},
+    ipList: [ '172.26.240.1', '172.22.176.1', '192.168.0.105' ],
+    port: null,
+    hostname: 'LAPTOP-R2TGGFDL',
+    udpAddress: null,
+    cpu: null,
+    cpuSeq: null,
+    seq: 3,
+    offlineSince: null
+  }
+]
+
+broker.createService({})
+..................................................................................
+			    Services types
+1.sync service
+2.async service
+.....
+async services: Promise
+
+const { ServiceBroker } = require('moleculer')
+const broker = new ServiceBroker()
+
+//declare service
+broker.createService({
+    name: 'greeter',
+    actions: {
+        //args
+        async sayHello(ctx) {
+            const response = await ctx.call('hello.sayHello')
+            //console.log(response)
+            //    response.then(res=>console.log(res))
+            return response
+        }
+    }
+})
+broker.createService({
+    name: 'hello',
+    actions: {
+        //args
+        sayHello(ctx) {
+            return new this.Promise((resolve, reject) => {
+                setTimeout(resolve, 5000, 'Hello,Async')
+            })
+        }
+    }
+})
+
+
+async function main() {
+    try {
+        await broker.start()
+        broker.repl()
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+main()
+.....................................................................................
+			  Service Versioning
+.....................................................................................
+Each service can have version no, based on version no services can be indentified
+so that the same service can be duplicated with various features.
+
+{ 
+ name:'posts'
+ version:1
+}
+how to invoke service
+v1.posts.findAll
+
+const { ServiceBroker } = require('moleculer')
+const broker = new ServiceBroker()
+
+//declare service
+broker.createService({
+    name: 'posts',
+    version: 1,
+    actions: {
+        //args
+        async findAll(ctx) {
+            return 'posts -v1'
+        }
+    }
+})
+broker.createService({
+    name: 'posts',
+    version: 2,
+    actions: {
+        //args
+        async findAll(ctx) {
+            return 'posts -v2'
+        }
+    }
+})
+async function main() {
+    try {
+        await broker.start()
+        broker.repl()
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+main()
+
+mol $ call v1.posts.findAll
+>> Call 'v1.posts.findAll' with params: {} with meta: { '$repl': true }
+>> Execution time:3ms
+>> Response:
+'posts -v1'
+mol $ call v2.posts.findAll
+>> Call 'v2.posts.findAll' with params: {} with meta: { '$repl': true }
+>> Execution time:1ms
+>> Response:
+'posts -v2'
+mol $
+....................................................................................
+			 Return Data and Serialization
+....................................................................................
+Transporter needs a serializer module which serializes & deserializes the transferred packets. 
+The default serializer is the JSONSerializer but there are several built-in serializer.
+
+Types of Serializer:
+1.JSON serializer
+2.Avro serializer
+3.MsgPack serializer
+4.Notepack serializer
+5.ProtoBuf serializer
+6.Thrift serializer
+7.CBOR serializer
+
+
+const { ServiceBroker } = require('moleculer')
+const todos = require('../mock-data/todos')
+
+
+const broker = new ServiceBroker({
+    serializer: "JSON"
+})
+
+//declare service
+broker.createService({
+    name: 'dashboard',
+    actions: {
+        //args
+        async list(ctx) {
+            const response = await ctx.call('todos.listTodos')
+            return response
+        }
+    }
+})
+broker.createService({
+    name: 'todos',
+    actions: {
+        //args
+        listTodos(ctx) {
+            return new this.Promise((resolve, reject) => {
+                setTimeout(resolve, 5000, JSON.stringify(todos))
+            })
+        }
+    }
+})
+
+
+async function main() {
+    try {
+        await broker.start()
+        broker.repl()
+    }
+    catch (err) {
+        console.log(err)
+    }
+}
+main()
