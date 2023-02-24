@@ -3078,7 +3078,7 @@ main()
 Modular apps using molculer-cli -realtime project structure...
 
 
-		              Service Registry and Discovery
+		           Service Registry and Discovery
 .....................................................................................
 
 1.Service Registry
@@ -3133,7 +3133,7 @@ const broker = new ServiceBroker({
 [2021-07-31T08:44:43.219Z] INFO  laptop-r2tggfdl-24816/REGISTRY: Discoverer: RedisDiscoverer
 .....................................................................................
 				..............................................................................................
-				High Availability and scalibity
+			High Availability and scalibity
 ..............................................................................................
 			   	
  				  Load Balancing
@@ -3347,7 +3347,7 @@ async function main() {
 }
 main();
 ..................................................................................
-			Realiability Design pattern
+		     Fault tolerance  Design pattern
 ..................................................................................
 
 In Microservices, services are talking each other, while talking there are possiblity.
@@ -3471,6 +3471,231 @@ call main.begin --a 10 --b 20 --timeout 2000
 >> Execution time:2s
 >> Response:
 'From the Cache 0'
+.....................................................................................		                    Retry
+.....................................................................................
+
+if caller is calling callee
+  =>callee may return response on time
+  =>callee may not return response
+
+x service is calling y service
+   you may get result.
+
+if  y is throwing expection,
+    we stop the program flow and handle the expection
+this is called as  "Fail fast "  approach.
+
+if caller is trying the callee "n" number of times , during repeated calls , the server may responed- "fail slow" apporach- retry.
+
+const broker = new ServiceBroker({
+    transporter: "TCP",
+    retryPolicy: {
+        enabled: true,
+        retries: 5,
+        delay: 100,
+        maxDelay: 2000,
+        factor: 2,
+        check: err => err && !!err.retryable
+    },
+    registry: {
+        discoverer: "Local",
+        strategy: "RoundRobin"
+    }
+})
+
+
+broker.call("posts.find", {}, { retries: 3 });
+
+eg:
+const { ServiceBroker } = require('moleculer')
+const ApiGateWay = require('moleculer-web')
+
+const broker = new ServiceBroker({
+    transporter: "TCP",
+    requestTimeout: 5 * 1000, // in milliseconds
+    retryPolicy: {
+        enabled: true,
+        retries: 5,
+        delay: 100,
+        maxDelay: 2000,
+        factor: 2,
+        check: err => err && !!err.retryable
+    },
+    registry: {
+        discoverer: "Local",
+        strategy: "RoundRobin"
+    }
+})
+
+//api server : http server
+broker.createService({
+    name: 'ApiGateWay',
+    mixins: [ApiGateWay],
+    settings: {
+        routes: [
+            {
+                path: '/api',
+                aliases: {
+                },
+                autoAliases: true
+            }
+        ]
+    }
+})
+
+//calller
+broker.createService({
+    name: 'users',
+    actions: {
+        list: {
+            rest: "GET /",
+            fallback: 'getValue',
+            handler(ctx) {
+                //timeout for callee : the users service expects data from the comments service within 2000ms.
+                return ctx.call('comments.list', { timeout: 3000 })
+            }
+        }
+    },
+    methods: {
+        getValue() {
+            return 'Sorry Timeouted'
+        }
+    }
+
+})
+//callee
+broker.createService({
+    name: 'comments',
+    actions: {
+        list: {
+            handler(ctx) {
+                console.log('calling....', new Date())
+                return new this.Promise((resolve, reject) => {
+                    setTimeout(resolve, 5000, "comments")
+                })
+
+            }
+        }
+    }
+
+})
+async function main() {
+    await broker.start()
+}
+main()
+....................................................................................
+				Bulk Head
+....................................................................................
+
+if clients are hitting the service concurrently, lets say in 1sec 1000 hits.
+
+Bulk head design patterns prevents the service hitting concurrently.
+
+  bulkhead: {
+        enabled: true,
+        concurrency: 3, //Maximum concurrent executions.
+        maxQueueSize: 10, //how many people can wait in the wait queue
+    },
+The concurrency value restricts the concurrent request executions. If the maxQueueSize is bigger than 0, broker stores the additional requests in a queue if all slots are taken. If the queue size reaches the maxQueueSize limit, broker will throw QueueIsFull exception for every addition requests.
+const { ServiceBroker } = require('moleculer')
+const ApiGateWay = require('moleculer-web')
+
+const broker = new ServiceBroker({
+    transporter: "TCP",
+    bulkhead: {
+        enabled: true,
+        concurrency: 3, //Maximum concurrent executions.
+        maxQueueSize: 4, //how many people can wait in the wait queue
+    },
+    registry: {
+        discoverer: "Local",
+        strategy: "RoundRobin"
+    }
+})
+
+//api server : http server
+broker.createService({
+    name: 'ApiGateWay',
+    mixins: [ApiGateWay],
+    settings: {
+        cors: {
+            // Configures the Access-Control-Allow-Origin CORS header.
+            origin: "*",
+            // Configures the Access-Control-Allow-Methods CORS header. 
+            methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
+            // Configures the Access-Control-Allow-Headers CORS header.
+            allowedHeaders: [],
+            // Configures the Access-Control-Expose-Headers CORS header.
+            exposedHeaders: [],
+            // Configures the Access-Control-Allow-Credentials CORS header.
+            credentials: false,
+            // Configures the Access-Control-Max-Age CORS header.
+            maxAge: 3600
+        },
+        routes: [
+            {
+                path: '/api',
+                aliases: {
+                },
+                autoAliases: true
+            }
+        ]
+    }
+})
+
+//calller
+broker.createService({
+    name: 'users',
+    actions: {
+        list: {
+            rest: "GET /",
+            //  fallback: 'getValue',
+            bulkhead: {
+                // Disable bulkhead for this action
+                enabled: true,
+                concurrency: 3
+            },
+            handler(ctx) {
+                //timeout for callee : the users service expects data from the comments service within 2000ms.
+                //return ctx.call('comments.list', { timeout: 6000 })
+                console.log('users are calling')
+                return 'users'
+            }
+        }
+    },
+    methods: {
+        getValue() {
+            return 'Sorry Timeouted'
+        }
+    }
+
+})
+//callee
+broker.createService({
+    name: 'comments',
+    actions: {
+        list: {
+            bulkhead: {
+                // Disable bulkhead for this action
+                enabled: true
+            },
+            handler(ctx) {
+                console.log("calling...")
+                return 'comments'
+
+            }
+        }
+    }
+
+})
+async function main() {
+    await broker.start()
+}
+main()
+
+
+
+
 .............................................********************...................
 /////////////////////////////////////////////////////////////////////////////////////////////
 				Circuit Breaker
@@ -3686,7 +3911,7 @@ Moleculer cli
 npm i -g moleculer-cli
 
 
-
+moleculer init project my-project
 
 
 
